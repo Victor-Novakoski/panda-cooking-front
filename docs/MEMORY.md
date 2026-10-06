@@ -17,3 +17,12 @@ Decisões e o porquê delas. Decisão nova entra aqui ([RULES.md](RULES.md#7-doc
 - **Compose fica no repositório da API:** banco, migração e seed são dela. O front é montado de `../panda-cooking-front` e roda `next dev` num `node:22-alpine`, sem Dockerfile próprio por enquanto; a imagem de produção entra no deploy.
 - **`API_INTERNAL_URL`:** a página da receita busca os dados no servidor do Next. Dentro do Docker, `localhost:8080` é o próprio container do front, então o servidor usa `http://api:8080` e o navegador continua com `NEXT_PUBLIC_API_URL`.
 - **`WATCHPACK_POLLING`:** no Docker do Windows e do Mac a pasta montada não avisa o container de arquivo alterado; com polling o hot reload funciona.
+
+## 2026-10 — Testes e logout no 401
+
+- **Vitest + Testing Library, não Jest:** mesma ferramenta do Rastreia, roda TypeScript e JSX sem Babel e é rápido. O Next não precisa estar de pé: componente é renderizado no jsdom com `next/navigation` mockado.
+- **Testes ao lado do código:** `api.test.ts` junto de `api.ts`; achar o teste de um arquivo não exige procurar outra pasta.
+- **Job separado na CI (`Testes (Vitest)`):** falha de teste aparece com nome próprio no PR, separada de lint e build.
+- **401 chama `clearAuth()` da store:** a store já sabia apagar tudo (token, cookie e estado persistido); o interceptor só apagava o `localStorage`, e o cookie fazia o `proxy.ts` devolver o usuário ao painel.
+- **401 do `POST /auth` não derruba a sessão:** ali é senha errada, não sessão vencida. Antes, o redirecionamento recarregava a página de login e a mensagem "Email ou senha incorretos" nunca aparecia.
+- **Token do login só na chamada do perfil:** antes ia para `api.defaults` e ficava no axios depois do logout.
