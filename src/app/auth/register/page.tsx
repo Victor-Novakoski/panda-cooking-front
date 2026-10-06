@@ -51,8 +51,8 @@ export default function RegisterPage() {
         <div>
           <div className="mb-6 text-center text-8xl">🍳🐼</div>
           <p className="text-2xl font-black leading-snug text-white" style={{ textShadow: "2px 2px 0 #5a0f0f" }}>
-            "Compartilhe sabor,{" "}
-            <span className="text-[#F0C040]">inspire pessoas.</span>"
+            &ldquo;Compartilhe sabor,{" "}
+            <span className="text-[#F0C040]">inspire pessoas.</span>&rdquo;
           </p>
           <p className="mt-3 text-sm font-bold text-[#D4A017]">— comunidade Panda Cooking</p>
         </div>

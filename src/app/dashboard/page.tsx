@@ -74,7 +74,7 @@ export default function DashboardPage() {
           <div className="flex flex-col items-center justify-center rounded-2xl border-[3px] border-[#1A0A00] bg-white py-24 text-center shadow-[4px_4px_0px_#1A0A00]">
             <div className="mb-4 text-6xl">🔍</div>
             <p className="font-black text-[#1A0A00]">Nenhuma receita encontrada</p>
-            <p className="mt-1 text-sm font-semibold text-[#1A0A00]/50">para "{search}"</p>
+            <p className="mt-1 text-sm font-semibold text-[#1A0A00]/50">para &ldquo;{search}&rdquo;</p>
           </div>
         )}
       </main>
