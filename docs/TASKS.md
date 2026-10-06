@@ -19,6 +19,11 @@ Backlog em ordem. Só se trabalha na etapa atual; o que surgir no caminho entra 
 - [x] Next 16.3.8 e axios atualizados (havia vulnerabilidade crítica no Next)
 - [ ] Branch `develop`, proteção da `main` e da `develop` com os checks obrigatórios (feito pelo victor no GitHub)
 
+## Etapa 1.1 — Tudo com um `docker compose up`
+
+- [x] Sobe junto com banco e API pelo compose do repositório da API, com hot reload
+- [x] Página renderizada no servidor usa `API_INTERNAL_URL` para achar a API dentro do Docker
+
 ## Etapa 2 — Segurança e testes
 
 - [ ] Testes automatizados (proposta: Vitest + Testing Library, a discutir)
