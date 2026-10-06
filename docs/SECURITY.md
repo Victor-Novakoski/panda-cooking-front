@@ -2,7 +2,7 @@
 
 A lista completa de riscos fica na API: [panda-cooking-go-api/docs/SECURITY.md](https://github.com/Victor-Novakoski/panda-cooking-go-api/blob/develop/docs/SECURITY.md). Aqui ficam os que dependem do front. Checklist por mudança em [RULES.md](RULES.md#3-segurança).
 
-Situação revisada em 06/10/2026, na etapa 1 (setup).
+Situação revisada em 06/10/2026, na etapa 2 (testes e logout no 401).
 
 **Legenda:** ✅ feito · 🟡 parcial · 🔴 pendente
 
@@ -20,6 +20,6 @@ Situação revisada em 06/10/2026, na etapa 1 (setup).
 
 Hoje o token fica no `localStorage` e num cookie que o JavaScript lê. Qualquer XSS rouba a sessão por 24h, e não há como revogar.
 
-Além disso, quando a API responde 401 o axios apaga só o `localStorage`: o cookie e o estado do Zustand continuam, então o `proxy.ts` manda o usuário de volta do login para o painel como se ele ainda estivesse logado.
+Quando a API responde 401, o front encerra a sessão inteira: `localStorage`, cookie e estado do Zustand (antes só o `localStorage` era apagado, e o `proxy.ts` ainda via o cookie e devolvia o usuário para o painel). Coberto em `src/services/api.test.ts`.
 
 Proposta (a discutir na etapa 2): access token curto na memória + refresh token em cookie `HttpOnly`, `Secure` e `SameSite`, como no Rastreia. Precisa de mudança na API junto.

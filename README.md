@@ -8,7 +8,7 @@ API: [panda-cooking-go-api](https://github.com/Victor-Novakoski/panda-cooking-go
 
 ## Stack
 
-Next.js 16 · React 19 · TypeScript · Tailwind CSS 4 · TanStack Query · Zustand · React Hook Form + Zod · GitHub Actions
+Next.js 16 · React 19 · TypeScript · Tailwind CSS 4 · TanStack Query · Zustand · React Hook Form + Zod · Vitest + Testing Library · GitHub Actions
 
 ## Rodando local
 
@@ -27,6 +27,7 @@ npm run dev
 | `npm run dev` | servidor de desenvolvimento |
 | `npm run lint` | ESLint, sem aceitar warning |
 | `npm run typecheck` | TypeScript |
+| `npm test` | testes (Vitest + Testing Library); `npm run test:watch` para rodar enquanto edita |
 | `npm run build` | build de produção |
 
 ## Documentação

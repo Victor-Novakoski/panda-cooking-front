@@ -2,7 +2,7 @@
 
 Backlog em ordem. Só se trabalha na etapa atual; o que surgir no caminho entra aqui antes de ser feito ([RULES.md](RULES.md#1-escopo)).
 
-**Etapa atual: 1 — Setup do repositório**
+**Etapa atual: 2 — Segurança e testes**
 
 ## Etapa 0 — Base do front ✅
 
@@ -26,8 +26,8 @@ Backlog em ordem. Só se trabalha na etapa atual; o que surgir no caminho entra 
 
 ## Etapa 2 — Segurança e testes
 
-- [ ] Testes automatizados (proposta: Vitest + Testing Library, a discutir)
-- [ ] 401 limpa a sessão inteira (cookie e Zustand), não só o `localStorage`
+- [x] Testes automatizados com Vitest + Testing Library, rodando na CI (job `Testes (Vitest)`)
+- [x] 401 limpa a sessão inteira (cookie e Zustand), não só o `localStorage`; senha errada no login mostra o erro em vez de recarregar a página
 - [ ] Token: refresh em cookie `HttpOnly` (junto com a API, a discutir)
 - [ ] URLs de imagem só `http`/`https`
 - [ ] Limites dos formulários iguais aos da API

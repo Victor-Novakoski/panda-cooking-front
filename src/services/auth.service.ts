@@ -15,9 +15,10 @@ interface RegisterPayload {
 export const authService = {
   login: async (data: LoginPayload): Promise<{ token: string; user: User }> => {
     const { data: tokenData } = await api.post<{ token: string }>("/auth", data)
-    // salva token temporariamente para buscar perfil
-    api.defaults.headers.common["Authorization"] = `Bearer ${tokenData.token}`
-    const { data: user } = await api.get<User>("/users/profile")
+    // O token ainda não está salvo, então vai só nesta chamada (não fica no axios depois do logout).
+    const { data: user } = await api.get<User>("/users/profile", {
+      headers: { Authorization: `Bearer ${tokenData.token}` },
+    })
     return { token: tokenData.token, user }
   },
 

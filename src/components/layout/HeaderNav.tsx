@@ -42,6 +42,8 @@ export function HeaderNav() {
         </Link>
         <button
           onClick={handleLogout}
+          aria-label="Sair"
+          title="Sair"
           className="rounded-lg p-2 text-[#F0C040]/60 transition-colors hover:bg-white/10 hover:text-[#F0C040]"
         >
           <LogOut className="h-4 w-4" />
