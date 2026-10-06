@@ -8,7 +8,7 @@ import { recipesService } from "@/services/recipes.service"
 import { Header } from "@/components/layout/Header"
 import { RecipeCard } from "@/components/recipe/RecipeCard"
 import Link from "next/link"
-import { Plus } from "lucide-react"
+import { Pencil, Plus } from "lucide-react"
 
 type Tab = "recipes" | "favorites"
 
@@ -38,7 +38,7 @@ export default function ProfilePage() {
       <main className="mx-auto max-w-7xl px-6 py-10">
         {/* Card de perfil */}
         <div className="mb-8 flex flex-col items-start gap-4 rounded-2xl border-[3px] border-[#1A0A00] bg-white p-6 shadow-[4px_4px_0px_#1A0A00] sm:flex-row sm:items-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-[#1A0A00] bg-[#D4A017] text-4xl shadow-[3px_3px_0px_#1A0A00]">
+          <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-[3px] border-[#1A0A00] bg-[#D4A017] text-4xl shadow-[3px_3px_0px_#1A0A00]">
             {user?.image_profile
               ? // A foto é uma URL qualquer informada pelo usuário; o next/image exigiria liberar cada domínio.
                 // eslint-disable-next-line @next/next/no-img-element
@@ -50,12 +50,20 @@ export default function ProfilePage() {
             <h1 className="text-2xl font-black text-[#1A0A00]">{user?.name}</h1>
             <p className="text-sm font-semibold text-[#1A0A00]/50">{user?.email}</p>
           </div>
-          <Link
-            href="/recipes/new"
-            className="flex items-center gap-2 rounded-xl border-[3px] border-[#A07010] bg-[#D4A017] px-5 py-2.5 text-sm font-black text-[#1A0A00] shadow-[3px_3px_0px_#1A0A00] transition-all hover:bg-[#F0C040] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
-          >
-            <Plus className="h-4 w-4" /> Nova receita
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/profile/edit"
+              className="flex items-center gap-2 rounded-xl border-[3px] border-[#1A0A00] bg-white px-5 py-2.5 text-sm font-black text-[#1A0A00] shadow-[3px_3px_0px_#1A0A00] transition-all hover:bg-[#F5E6C8] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+            >
+              <Pencil className="h-4 w-4" /> Editar perfil
+            </Link>
+            <Link
+              href="/recipes/new"
+              className="flex items-center gap-2 rounded-xl border-[3px] border-[#A07010] bg-[#D4A017] px-5 py-2.5 text-sm font-black text-[#1A0A00] shadow-[3px_3px_0px_#1A0A00] transition-all hover:bg-[#F0C040] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+            >
+              <Plus className="h-4 w-4" /> Nova receita
+            </Link>
+          </div>
         </div>
 
         {/* Tabs */}

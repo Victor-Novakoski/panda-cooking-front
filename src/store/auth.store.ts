@@ -6,6 +6,7 @@ interface AuthState {
   user: User | null
   token: string | null
   setAuth: (user: User, token: string) => void
+  setUser: (user: User) => void
   clearAuth: () => void
   isAuthenticated: () => boolean
 }
@@ -28,6 +29,8 @@ export const useAuthStore = create<AuthState>()(
         setCookie("@pandaToken", token)
         set({ user, token })
       },
+      // Depois de editar o perfil: troca os dados do usuário e mantém a sessão.
+      setUser: (user) => set({ user }),
       clearAuth: () => {
         localStorage.removeItem("@pandaToken")
         deleteCookie("@pandaToken")
@@ -38,6 +41,10 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "panda-auth",
       partialize: (state) => ({ user: state.user, token: state.token }),
+      // O servidor não tem localStorage e renderiza sem usuário. Se o navegador lesse a
+      // sessão já no primeiro render, o HTML não bateria com o do servidor (erro de
+      // hidratação). O Providers chama rehydrate() depois de montar.
+      skipHydration: true,
     }
   )
 )
