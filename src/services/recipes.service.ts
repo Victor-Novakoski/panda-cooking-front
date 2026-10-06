@@ -1,7 +1,7 @@
 import { api } from "./api"
 import { Recipe } from "@/types"
 
-interface CreateRecipePayload {
+export interface RecipePayload {
   name: string
   description: string
   time: string
@@ -23,13 +23,14 @@ export const recipesService = {
     return res.data
   },
 
-  create: async (data: CreateRecipePayload): Promise<Recipe> => {
+  create: async (data: RecipePayload): Promise<Recipe> => {
     const res = await api.post("/recipes", data)
     return res.data
   },
 
-  update: async (id: string, data: Partial<CreateRecipePayload>): Promise<Recipe> => {
-    const res = await api.patch(`/recipes/${id}`, data)
+  // Troca a receita inteira (dados, fotos, ingredientes e passos) numa transação na API.
+  replace: async (id: string, data: RecipePayload): Promise<Recipe> => {
+    const res = await api.put(`/recipes/${id}`, data)
     return res.data
   },
 

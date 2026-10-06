@@ -5,6 +5,7 @@ import { Recipe } from "@/types"
 import { Header } from "@/components/layout/Header"
 import { FavoriteButton } from "@/components/recipe/FavoriteButton"
 import { CommentSection } from "@/components/recipe/CommentSection"
+import { RecipeOwnerActions } from "@/components/recipe/RecipeOwnerActions"
 import { Clock, Users, ChefHat } from "lucide-react"
 
 interface PageProps {
@@ -92,11 +93,13 @@ export default async function RecipePage({ params }: PageProps) {
               </ol>
             </div>
 
-            <CommentSection recipeId={recipe.id} comments={recipe.comments ?? []} />
+            <CommentSection recipeId={recipe.id} />
           </div>
 
           {/* Sidebar */}
           <aside className="flex flex-col gap-4">
+            <RecipeOwnerActions recipeId={recipe.id} ownerId={recipe.user_id} />
+
             {/* Info */}
             <div className="rounded-2xl border-[3px] border-[#1A0A00] bg-white p-5 shadow-[4px_4px_0px_#1A0A00]">
               <p className="mb-4 text-xs font-black uppercase tracking-widest text-[#1A0A00]/40">Informações</p>

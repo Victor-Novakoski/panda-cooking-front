@@ -35,8 +35,10 @@ export interface Preparation {
 export interface Comment {
   id: number
   description: string
-  user_id: string
   recipe_id: string
+  user: Pick<User, "id" | "name" | "image_profile">
+  created_at: string
+  updated_at: string
 }
 
 export interface Recipe {
@@ -51,5 +53,4 @@ export interface Recipe {
   images: ImageRecipe[]
   ingredients: IngredientRecipe[]
   preparations: Preparation[]
-  comments: Comment[]
 }

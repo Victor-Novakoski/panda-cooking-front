@@ -2,7 +2,7 @@
 
 Backlog em ordem. Só se trabalha na etapa atual; o que surgir no caminho entra aqui antes de ser feito ([RULES.md](RULES.md#1-escopo)).
 
-**Etapa atual: 2 — Segurança e testes**
+**Etapa atual: 3 — Telas que faltam** (falta paginação e filtro, que dependem da API)
 
 ## Etapa 0 — Base do front ✅
 
@@ -29,14 +29,15 @@ Backlog em ordem. Só se trabalha na etapa atual; o que surgir no caminho entra 
 - [x] Testes automatizados com Vitest + Testing Library, rodando na CI (job `Testes (Vitest)`)
 - [x] 401 limpa a sessão inteira (cookie e Zustand), não só o `localStorage`; senha errada no login mostra o erro em vez de recarregar a página
 - [ ] Token: refresh em cookie `HttpOnly` (junto com a API, a discutir)
-- [ ] URLs de imagem só `http`/`https`
+- [x] URLs de imagem só `http`/`https` (formulário de receita e de perfil)
 - [ ] Limites dos formulários iguais aos da API
 
 ## Etapa 3 — Telas que faltam
 
-- [ ] Editar e apagar receita
-- [ ] Editar perfil
-- [ ] Editar comentário
+- [x] Editar e apagar receita (`/recipes/[id]/edit`, formulário igual ao da criação, salva tudo de uma vez)
+- [x] Editar perfil (`/profile/edit`, nome e foto, com opção de remover a foto)
+- [x] Comentários listados na receita, com editar no lugar para o autor e apagar para autor ou admin
+- [x] Erro de hidratação: a sessão salva só é lida depois do primeiro render
 - [ ] Paginação e filtro por categoria (depende da API)
 
 ## Etapa 4 — Deploy

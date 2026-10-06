@@ -41,3 +41,13 @@ api.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+// Mensagem de erro que a API mandou (ela já vem em português e sem detalhe interno),
+// ou o texto padrão quando não há resposta.
+export function apiErrorMessage(error: unknown, fallback: string): string {
+  if (axios.isAxiosError(error)) {
+    const message = error.response?.data?.error
+    if (typeof message === "string" && message) return message
+  }
+  return fallback
+}
