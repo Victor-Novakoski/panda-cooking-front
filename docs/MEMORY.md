@@ -10,3 +10,4 @@ Decisões e o porquê delas. Decisão nova entra aqui ([RULES.md](RULES.md#7-doc
 - **`<img>` na foto de perfil:** a foto é uma URL de qualquer domínio; o `next/image` exigiria liberar cada domínio.
 - **Next 16.2.6 → 16.3.8:** a versão antiga tinha vulnerabilidade crítica (entre elas, bypass do `proxy.ts`, que é o que protege as rotas).
 - **Repositório público:** nada de código, nome de cliente ou padrão interno de outra empresa entra aqui.
+- **Dependabot sem versão major:** o primeiro PR dele subiu ESLint 10 e TypeScript 7 juntos, e o `eslint-config-next` ainda não funciona com o ESLint 10. Major é atualizada à mão, num PR próprio.
