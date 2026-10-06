@@ -48,8 +48,8 @@ export default function LoginPage() {
         <div>
           <div className="mb-6 text-center text-8xl">🐼🍜</div>
           <p className="text-2xl font-black leading-snug text-white" style={{ textShadow: "2px 2px 0 #5a0f0f" }}>
-            "A barriga cheia faz o{" "}
-            <span className="text-[#F0C040]">coração feliz.</span>"
+            &ldquo;A barriga cheia faz o{" "}
+            <span className="text-[#F0C040]">coração feliz.</span>&rdquo;
           </p>
           <p className="mt-3 text-sm font-bold text-[#D4A017]">— Mestre Po</p>
         </div>
