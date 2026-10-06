@@ -12,15 +12,15 @@ Next.js 16 · React 19 · TypeScript · Tailwind CSS 4 · TanStack Query · Zust
 
 ## Rodando local
 
-Precisa de Node 22+ e da API rodando (veja o README dela).
+O jeito mais simples é subir tudo junto pelo repositório da API: clone os dois lado a lado e rode `docker compose up --build` dentro de `panda-cooking-go-api` (veja o [README dela](https://github.com/Victor-Novakoski/panda-cooking-go-api#rodando-local)). O front abre em `http://localhost:3000` e recarrega ao salvar; os usuários de demonstração entram com a senha `panda-cooking-demo`.
+
+Sem Docker, com Node 22+ e a API rodando:
 
 ```bash
 cp .env.example .env.local
 npm install
 npm run dev
 ```
-
-Abre em `http://localhost:3000`.
 
 | Comando | O que faz |
 | --- | --- |

@@ -1,8 +1,13 @@
 import axios from "axios"
 
-export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
-})
+// No servidor do Next (páginas renderizadas lá), API_INTERNAL_URL aponta a API pela rede
+// do Docker; no navegador vale sempre a URL pública.
+const baseURL =
+  typeof window === "undefined"
+    ? (process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL)
+    : process.env.NEXT_PUBLIC_API_URL
+
+export const api = axios.create({ baseURL })
 
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
