@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panda Cooking — Design Concept</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── TOKENS ─────────────────────────────────────────────────────── */
+    :root {
+      --red:        #C0392B;
+      --red-light:  #E74C3C;
+      --red-dark:   #8B1A1A;
+      --gold:       #D4A017;
+      --gold-light: #F0C040;
+      --gold-dark:  #A07010;
+      --ink:        #1A0A00;
+      --cream:      #FDF6E3;
+      --paper:      #F5E6C8;
+      --bamboo:     #4A7C59;
+      --jade:       #2E8B57;
+      --shadow:     4px 4px 0px var(--ink);
+      --shadow-lg:  6px 6px 0px var(--ink);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+    }
+
+    /* ─── LABEL DE SEÇÃO ─────────────────────────────────────────────── */
+    .section-label {
+      background: var(--ink);
+      color: var(--gold-light);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      display: inline-block;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       1. HEADER
+    ═══════════════════════════════════════════════════════════════════ */
+    .header {
+      background: var(--red-dark);
+      border-bottom: 4px solid var(--gold);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+      position: relative;
+    }
+
+    /* padrão de onda chinesa no topo do header */
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--gold) 0, var(--gold) 12px,
+        var(--gold-dark) 12px, var(--gold-dark) 24px
+      );
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--gold);
+      border-radius: 12px;
+      border: 3px solid var(--gold-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--gold-light);
+      text-shadow: 2px 2px 0px var(--red-dark);
+      letter-spacing: 0.5px;
+    }
+
+    .logo-sub {
+      font-size: 10px;
+      color: var(--gold);
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: -4px;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-link {
+      color: var(--gold-light);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background .15s;
+    }
+    .nav-link:hover { background: rgba(255,255,255,.1); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      padding: 8px 18px;
+      border-radius: 10px;
+      border: 3px solid var(--ink);
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform .1s, box-shadow .1s;
+      text-decoration: none;
+    }
+    .btn:active { transform: translate(3px,3px); box-shadow: none; }
+
+    .btn-gold {
+      background: var(--gold);
+      color: var(--ink);
+    }
+    .btn-gold:hover { background: var(--gold-light); }
+
+    .btn-red {
+      background: var(--red);
+      color: #fff;
+    }
+    .btn-red:hover { background: var(--red-light); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--gold-light);
+      border-color: var(--gold);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       2. HERO
+    ═══════════════════════════════════════════════════════════════════ */
+    .hero {
+      background: var(--red-dark);
+      background-image:
+        radial-gradient(ellipse at 80% 50%, #8B1A1A 0%, transparent 60%),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      border-bottom: 5px solid var(--gold);
+      padding: 72px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* lanternas decorativas */
+    .hero::after {
+      content: '🏮 🏮 🏮';
+      position: absolute;
+      top: -8px;
+      right: 80px;
+      font-size: 40px;
+      opacity: .4;
+      letter-spacing: 24px;
+    }
+
+    .hero-content { max-width: 540px; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--gold);
+      color: var(--ink);
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 1px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 2px solid var(--gold-dark);
+      box-shadow: 3px 3px 0 var(--ink);
+      margin-bottom: 20px;
+    }
+
+    .hero-title {
+      font-size: 52px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.1;
+      text-shadow: 3px 3px 0px var(--red-dark);
+      margin-bottom: 16px;
+    }
+
+    .hero-title span {
+      color: var(--gold-light);
+      text-shadow: 3px 3px 0px var(--gold-dark);
+    }
+
+    .hero-desc {
+      color: rgba(255,255,255,.75);
+      font-size: 16px;
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* panda mascote placeholder */
+    .hero-mascot {
+      width: 220px;
+      height: 220px;
+      background: var(--paper);
+      border-radius: 50%;
+      border: 5px solid var(--gold);
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .hero-mascot::after {
+      content: '🍜';
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      font-size: 32px;
+      background: var(--gold);
+      border-radius: 50%;
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid var(--ink);
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       3. FEATURES BAR
+    ═══════════════════════════════════════════════════════════════════ */
+    .features-bar {
+      background: var(--gold);
+      border-top: 4px solid var(--ink);
+      border-bottom: 4px solid var(--ink);
+      padding: 0;
+      display: flex;
+    }
+
+    .feature-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      border-right: 3px solid var(--ink);
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--ink);
+    }
+    .feature-item:last-child { border-right: none; }
+
+    .feature-icon {
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      background: #fff;
+      border-radius: 10px;
+      border: 2px solid var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       4. RECIPE CARDS
+    ═══════════════════════════════════════════════════════════════════ */
+    .section {
+      padding: 48px 32px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 28px;
+      background: var(--red);
+      border-radius: 3px;
+      border: 2px solid var(--ink);
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .recipe-card {
+      background: #fff;
+      border: 3px solid var(--ink);
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      transition: transform .15s, box-shadow .15s;
+      cursor: pointer;
+    }
+    .recipe-card:hover {
+      transform: translate(-3px, -3px);
+      box-shadow: 8px 8px 0 var(--ink);
+    }
+
+    .card-img {
+      height: 160px;
+      background: var(--paper);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 56px;
+      border-bottom: 3px solid var(--ink);
+    }
+
+    .card-img-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,.5), transparent 60%);
+    }
+
+    .card-category {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--gold);
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 2px solid var(--ink);
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+
+    .card-body { padding: 14px 16px; }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #888;
+      border-top: 2px dashed #e0d0b0;
+      padding-top: 10px;
+    }
+
+    .card-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       5. RECIPE DETAIL
+    ═══════════════════════════════════════════════════════════════════ */
+    .detail-hero {
+      height: 300px;
+      background: var(--paper);
+      border: 3px solid var(--ink);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 100px;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .detail-title-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,.7), transparent);
+      padding: 24px;
+    }
+
+    .detail-title-overlay h1 {
+      color: #fff;
+      font-size: 32px;
+      font-weight: 900;
+      text-shadow: 2px 2px 0 var(--ink);
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 28px;
+    }
+
+    .detail-card {
+      background: #fff;
+      border: 3px solid var(--ink);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .detail-card-title {
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--ink);
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 2px dashed #e0d0b0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .step {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 14px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      background: var(--red);
+      color: #fff;
+      border-radius: 50%;
+      border: 2px solid var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 12px;
+      flex-shrink: 0;
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+
+    .step p { font-size: 13px; line-height: 1.6; color: #444; padding-top: 4px; }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 2px dashed #e0d0b0;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .info-row:last-child { border-bottom: none; }
+
+    .info-icon {
+      width: 34px;
+      height: 34px;
+      background: var(--paper);
+      border: 2px solid var(--gold);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .ingredient-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      font-size: 13px;
+      border-bottom: 1px dashed #e0d0b0;
+    }
+    .ingredient-item:last-child { border: none; }
+
+    .ing-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--red);
+      border-radius: 50%;
+      border: 2px solid var(--ink);
+      flex-shrink: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       6. AUTH PAGE
+    ═══════════════════════════════════════════════════════════════════ */
+    .auth-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 440px;
+      border: 3px solid var(--ink);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .auth-left {
+      background: var(--red-dark);
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-right: 3px solid var(--ink);
+    }
+
+    .auth-mascot {
+      font-size: 80px;
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    .auth-quote {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.4;
+      text-shadow: 2px 2px 0 var(--red-dark);
+    }
+
+    .auth-quote span { color: var(--gold-light); }
+
+    .auth-right {
+      background: var(--cream);
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .auth-title {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .auth-sub {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 24px;
+    }
+
+    .form-group { margin-bottom: 14px; }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--ink);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 42px;
+      border: 3px solid var(--ink);
+      border-radius: 10px;
+      padding: 0 12px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      background: #fff;
+      box-shadow: 2px 2px 0 var(--ink);
+      outline: none;
+      transition: box-shadow .1s;
+    }
+    .form-input:focus {
+      border-color: var(--red);
+      box-shadow: 3px 3px 0 var(--red);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       7. DIVIDERS / ORNAMENTOS
+    ═══════════════════════════════════════════════════════════════════ */
+    .ornament {
+      text-align: center;
+      color: var(--gold-dark);
+      font-size: 20px;
+      letter-spacing: 12px;
+      margin: 8px 0;
+      opacity: .6;
+    }
+
+    /* ─── LAYOUT DO DOC ──────────────────────────────────────────────── */
+    .page { max-width: 1100px; margin: 0 auto; padding: 32px; }
+    .screen-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 40px 0 16px;
+    }
+    .screen-title {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #999;
+    }
+    hr.divider {
+      border: none;
+      border-top: 2px dashed #ddd;
+      flex: 1;
+    }
+
+    .palette {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 16px 0;
+    }
+    .swatch {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      border: 3px solid var(--ink);
+      box-shadow: 3px 3px 0 var(--ink);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 8px;
+      font-size: 10px;
+      font-weight: 800;
+      color: rgba(0,0,0,.6);
+    }
+    .swatch.light { color: rgba(255,255,255,.9); }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div style="text-align:center; padding: 24px 0 8px">
+    <div class="section-label">🐼 Panda Cooking — Design Concept v1</div>
+    <p style="margin-top:12px; color:#888; font-size:13px">Baseado na estética de Kung Fu Panda · Cultura chinesa · Visual cartunesco</p>
+  </div>
+
+  <!-- PALETA -->
+  <div class="screen-label">
+    <span class="screen-title">Paleta de cores</span>
+    <hr class="divider" />
+  </div>
+  <div class="palette">
+    <div class="swatch light" style="background:#8B1A1A">#8B1A1A<br>Vermelho Escuro</div>
+    <div class="swatch light" style="background:#C0392B">#C0392B<br>Vermelho</div>
+    <div class="swatch" style="background:#D4A017">#D4A017<br>Ouro</div>
+    <div class="swatch" style="background:#F0C040">#F0C040<br>Ouro Claro</div>
+    <div class="swatch" style="background:#FDF6E3; border-color:#ccc; box-shadow:3px 3px 0 #ccc">#FDF6E3<br>Creme</div>
+    <div class="swatch" style="background:#F5E6C8">#F5E6C8<br>Papel</div>
+    <div class="swatch light" style="background:#1A0A00">#1A0A00<br>Tinta</div>
+    <div class="swatch light" style="background:#4A7C59">#4A7C59<br>Bambu</div>
+  </div>
+  <p style="font-size:12px;color:#888;margin-top:4px">Tipografia: <strong>Nunito</strong> — arredondada, grossa, cartunesca. Bordas sólidas em todos os elementos (estilo comic/cartoon).</p>
+
+  <!-- ── HEADER ── -->
+  <div class="screen-label">
+    <span class="screen-title">Header / Navegação</span>
+    <hr class="divider" />
+  </div>
+  <div class="header">
+    <a class="logo" href="#">
+      <div class="logo-icon">🐼</div>
+      <div>
+        <div class="logo-text">Panda Cooking</div>
+        <div class="logo-sub">熊猫厨房</div>
+      </div>
+    </a>
+    <nav class="nav">
+      <a class="nav-link" href="#">Receitas</a>
+      <a class="nav-link" href="#">Categorias</a>
+      <a class="btn btn-outline" href="#">Entrar</a>
+      <a class="btn btn-gold" href="#">🍜 Cadastrar</a>
+    </nav>
+  </div>
+  <p style="font-size:12px;color:#888;margin-top:8px">Fundo vermelho escuro · Faixa dourada na borda inferior · Padrão xadrez dourado no topo · Subtítulo em caracteres chineses (decorativo)</p>
+
+  <!-- ── HERO ── -->
+  <div class="screen-label">
+    <span class="screen-title">Hero — Landing Page</span>
+    <hr class="divider" />
+  </div>
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">🏮 Comunidade de Receitas</div>
+      <h1 class="hero-title">
+        Descubra receitas<br /><span>incríveis</span> com<br />sabor de aventura
+      </h1>
+      <p class="hero-desc">
+        De dim sum a ramen. Explore pratos da comunidade, salve seus favoritos e compartilhe suas criações com o mundo.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-gold" href="#">🔍 Explorar receitas</a>
+        <a class="btn btn-outline" href="#">Criar conta grátis</a>
+      </div>
+    </div>
+    <div class="hero-mascot">🐼</div>
+  </div>
+
+  <!-- ── FEATURES BAR ── -->
+  <div class="features-bar">
+    <div class="feature-item">
+      <div class="feature-icon">🍳</div>
+      <div>
+        <div style="font-size:13px;font-weight:900">Crie receitas</div>
+        <div style="font-size:11px;font-weight:600;color:#666">Compartilhe com a comunidade</div>
+      </div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">❤️</div>
+      <div>
+        <div style="font-size:13px;font-weight:900">Salve favoritas</div>
+        <div style="font-size:11px;font-weight:600;color:#666">Monte sua coleção pessoal</div>
+      </div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">💬</div>
+      <div>
+        <div style="font-size:13px;font-weight:900">Interaja</div>
+        <div style="font-size:11px;font-weight:600;color:#666">Comente e conecte-se</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RECIPE CARDS ── -->
+  <div class="screen-label">
+    <span class="screen-title">Dashboard — Cards de Receitas</span>
+    <hr class="divider" />
+  </div>
+
+  <div style="background:var(--cream); border:3px solid var(--ink); border-radius:20px; padding:24px; box-shadow:var(--shadow-lg)">
+    <div class="section-header">
+      <div class="section-title">Receitas em Destaque</div>
+      <a class="btn btn-red" href="#" style="font-size:12px;padding:6px 14px">Ver todas →</a>
+    </div>
+    <div class="cards-grid">
+      <!-- Card 1 -->
+      <div class="recipe-card">
+        <div class="card-img" style="background:#FFE4B5">
+          🍜
+          <div class="card-img-overlay"></div>
+          <span class="card-category">Macarrão</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">Ramen do Mestre Po</div>
+          <div class="card-desc">Caldo rico e aromático com macarrão artesanal, ovo marinado e...</div>
+          <div class="card-meta">
+            <span>⏱ 60 min</span>
+            <span>👥 2 porções</span>
+          </div>
+        </div>
+      </div>
+      <!-- Card 2 -->
+      <div class="recipe-card">
+        <div class="card-img" style="background:#E8F5E9">
+          🥟
+          <div class="card-img-overlay"></div>
+          <span class="card-category">Dim Sum</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">Dumplings de Porco</div>
+          <div class="card-desc">Massa fina e recheio suculento. Receita secreta do Vale da Paz.</div>
+          <div class="card-meta">
+            <span>⏱ 45 min</span>
+            <span>👥 4 porções</span>
+          </div>
+        </div>
+      </div>
+      <!-- Card 3 -->
+      <div class="recipe-card">
+        <div class="card-img" style="background:#FFF3E0">
+          🍚
+          <div class="card-img-overlay"></div>
+          <span class="card-category">Arroz</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">Arroz Frito Imperial</div>
+          <div class="card-desc">Receita tradicional com legumes frescos, ovo e molho de soja especial.</div>
+          <div class="card-meta">
+            <span>⏱ 20 min</span>
+            <span>👥 3 porções</span>
+          </div>
+        </div>
+      </div>
+      <!-- Card 4 -->
+      <div class="recipe-card">
+        <div class="card-img" style="background:#FCE4EC">
+          🍡
+          <div class="card-img-overlay"></div>
+          <span class="card-category">Sobremesa</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">Mochi de Amendoim</div>
+          <div class="card-desc">Bolinho de arroz glutinoso com recheio cremoso de amendoim torrado.</div>
+          <div class="card-meta">
+            <span>⏱ 30 min</span>
+            <span>👥 8 porções</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RECIPE DETAIL ── -->
+  <div class="screen-label">
+    <span class="screen-title">Página de Receita</span>
+    <hr class="divider" />
+  </div>
+
+  <div style="background:var(--cream); border:3px solid var(--ink); border-radius:20px; padding:24px; box-shadow:var(--shadow-lg)">
+    <div class="detail-hero" style="background:#FFE4B5">
+      🍜
+      <div class="detail-title-overlay">
+        <h1>Ramen do Mestre Po</h1>
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+          <span style="background:var(--gold);color:var(--ink);font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;border:2px solid var(--ink)">Macarrão</span>
+          <a class="btn btn-red" href="#" style="font-size:12px;padding:5px 12px">❤️ Favoritar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div>
+        <p style="font-size:14px;line-height:1.7;color:#555;margin-bottom:20px">
+          Caldo rico e aromático preparado por horas, com macarrão artesanal feito à mão, ovo marinado em molho especial e topping crocante de bambu. A receita secreta do Mestre Po, revelada com carinho. 🐼
+        </p>
+
+        <div class="detail-card">
+          <div class="detail-card-title">📋 Modo de Preparo</div>
+          <div class="step">
+            <div class="step-num">1</div>
+            <p>Refogue o alho e o gengibre na wok em fogo alto por 2 minutos até dourar.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <p>Adicione o caldo de frango e deixe ferver por 30 minutos em fogo médio.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <p>Cozinhe o macarrão separadamente e disponha nas tigelas com o caldo quente.</p>
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <div class="detail-card-title">💬 Comentários</div>
+          <div style="background:var(--paper);border:2px solid var(--ink);border-radius:10px;padding:10px;margin-bottom:8px;font-size:13px">
+            <strong>Tigress:</strong> Receita incrível! Fiz para o Shifu e ele aprovou! 🐯
+          </div>
+          <div style="background:var(--paper);border:2px solid var(--ink);border-radius:10px;padding:10px;font-size:13px">
+            <strong>Mantis:</strong> O caldo ficou perfeito. Adicionei pimenta extra! 🥢
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="detail-card">
+          <div class="detail-card-title">ℹ️ Informações</div>
+          <div class="info-row">
+            <div class="info-icon">⏱</div>
+            <div><div style="font-size:11px;color:#999">Tempo</div><div>60 minutos</div></div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon">👥</div>
+            <div><div style="font-size:11px;color:#999">Porções</div><div>2 porções</div></div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon">🐼</div>
+            <div><div style="font-size:11px;color:#999">Chef</div><div>Po Ping</div></div>
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <div class="detail-card-title">🥢 Ingredientes</div>
+          <div class="ingredient-item"><div class="ing-dot"></div><strong>2 litros</strong>&nbsp;caldo de frango</div>
+          <div class="ingredient-item"><div class="ing-dot"></div><strong>200g</strong>&nbsp;macarrão ramen</div>
+          <div class="ingredient-item"><div class="ing-dot"></div><strong>4 dentes</strong>&nbsp;alho</div>
+          <div class="ingredient-item"><div class="ing-dot"></div><strong>30g</strong>&nbsp;gengibre fresco</div>
+          <div class="ingredient-item"><div class="ing-dot"></div><strong>2 unid</strong>&nbsp;ovo marinado</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── AUTH ── -->
+  <div class="screen-label">
+    <span class="screen-title">Tela de Login / Cadastro</span>
+    <hr class="divider" />
+  </div>
+
+  <div class="auth-layout">
+    <div class="auth-left">
+      <div>
+        <div style="font-size:24px;font-weight:900;color:var(--gold-light)">🐼 Panda Cooking</div>
+        <div style="font-size:11px;color:var(--gold);letter-spacing:2px;margin-top:2px">熊猫厨房</div>
+      </div>
+      <div>
+        <div class="auth-mascot">🐼🍜</div>
+        <div class="auth-quote">
+          "A barriga cheia faz o<br/><span>coração feliz.</span>"
+        </div>
+        <div style="font-size:11px;color:var(--gold);margin-top:8px">— Mestre Po</div>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,.4)">Receitas para todos os gostos</div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-title">Bem-vindo de volta! 👋</div>
+      <div class="auth-sub">Entre na sua conta para continuar cozinhando</div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" placeholder="mestre@pandacooking.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input class="form-input" type="password" placeholder="••••••••" />
+      </div>
+      <button class="btn btn-red" style="width:100%;justify-content:center;margin-top:8px;height:44px">
+        🥢 Entrar
+      </button>
+      <div style="text-align:center;margin-top:14px;font-size:13px;color:#888">
+        Não tem conta? <a href="#" style="color:var(--red);font-weight:800">Cadastre-se grátis</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="ornament" style="margin-top:48px">✦ ✦ ✦</div>
+  <div style="text-align:center;padding:16px 0 32px;color:#aaa;font-size:12px">
+    Panda Cooking Design Concept · Kung Fu Panda aesthetic · Para aprovação
+  </div>
+</div>
+
+</body>
+</html>

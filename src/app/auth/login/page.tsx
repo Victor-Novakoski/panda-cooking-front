@@ -1,0 +1,101 @@
+"use client"
+
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { useMutation } from "@tanstack/react-query"
+import { authService } from "@/services/auth.service"
+import { useAuthStore } from "@/store/auth.store"
+import { Input } from "@/components/ui/Input"
+
+const loginSchema = z.object({
+  email: z.email("Email inválido"),
+  password: z.string().min(6, "Mínimo de 6 caracteres"),
+})
+
+type LoginForm = z.infer<typeof loginSchema>
+
+export default function LoginPage() {
+  const router = useRouter()
+  const { setAuth } = useAuthStore()
+
+  const { register, handleSubmit, formState: { errors }, setError } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+  })
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: authService.login,
+    onSuccess: ({ user, token }) => {
+      setAuth(user, token)
+      router.push("/dashboard")
+    },
+    onError: () => setError("root", { message: "Email ou senha incorretos" }),
+  })
+
+  return (
+    <div className="flex min-h-screen">
+      {/* Esquerda */}
+      <div
+        className="hidden lg:flex lg:w-1/2 flex-col justify-between border-r-4 border-[#1A0A00] bg-[#8B1A1A] p-12"
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }}
+      >
+        <div>
+          <div className="text-xl font-black text-[#F0C040]">🐼 Panda Cooking</div>
+          <div className="mt-1 text-xs font-bold tracking-[3px] text-[#D4A017]">熊猫厨房</div>
+        </div>
+        <div>
+          <div className="mb-6 text-center text-8xl">🐼🍜</div>
+          <p className="text-2xl font-black leading-snug text-white" style={{ textShadow: "2px 2px 0 #5a0f0f" }}>
+            "A barriga cheia faz o{" "}
+            <span className="text-[#F0C040]">coração feliz.</span>"
+          </p>
+          <p className="mt-3 text-sm font-bold text-[#D4A017]">— Mestre Po</p>
+        </div>
+        <p className="text-xs font-semibold text-white/30">Receitas para todos os gostos</p>
+      </div>
+
+      {/* Direita */}
+      <div className="flex flex-1 flex-col items-center justify-center bg-[#FDF6E3] px-6 py-12">
+        <div className="w-full max-w-sm">
+          <Link href="/" className="mb-8 flex items-center gap-2 lg:hidden">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border-[3px] border-[#A07010] bg-[#D4A017] text-xl shadow-[2px_2px_0px_#1A0A00]">🐼</div>
+            <span className="font-black text-[#1A0A00]">Panda Cooking</span>
+          </Link>
+
+          <h1 className="text-2xl font-black text-[#1A0A00]">Bem-vindo de volta! 👋</h1>
+          <p className="mb-6 mt-1 text-sm font-semibold text-[#1A0A00]/50">Entre na sua conta para continuar</p>
+
+          <form onSubmit={handleSubmit((data) => mutate(data))} className="flex flex-col gap-4">
+            <Input id="email" label="Email" type="email" placeholder="mestre@pandacooking.com"
+              error={errors.email?.message} {...register("email")} />
+            <Input id="password" label="Senha" type="password" placeholder="••••••••"
+              error={errors.password?.message} {...register("password")} />
+
+            {errors.root && (
+              <div className="rounded-xl border-[3px] border-[#C0392B] bg-[#C0392B]/10 px-4 py-3 text-sm font-bold text-[#C0392B]">
+                {errors.root.message}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isPending}
+              className="mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-xl border-[3px] border-[#8B1A1A] bg-[#C0392B] text-sm font-black text-white shadow-[4px_4px_0px_#1A0A00] transition-all hover:bg-[#E74C3C] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:opacity-60"
+            >
+              {isPending ? "Entrando..." : "🥢 Entrar"}
+            </button>
+          </form>
+
+          <p className="mt-6 text-center text-sm font-semibold text-[#1A0A00]/50">
+            Não tem conta?{" "}
+            <Link href="/auth/register" className="font-black text-[#C0392B] hover:underline">
+              Cadastre-se grátis
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
