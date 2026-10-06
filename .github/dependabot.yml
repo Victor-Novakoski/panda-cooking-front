@@ -10,6 +10,11 @@ updates:
     groups:
       npm-deps:
         patterns: ["*"]
+    # Versão major (ex.: ESLint 10, TypeScript 7) costuma quebrar a configuração
+    # do Next; essas atualizações são feitas à mão, num PR próprio.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
