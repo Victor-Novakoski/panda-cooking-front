@@ -40,7 +40,9 @@ export default function ProfilePage() {
         <div className="mb-8 flex flex-col items-start gap-4 rounded-2xl border-[3px] border-[#1A0A00] bg-white p-6 shadow-[4px_4px_0px_#1A0A00] sm:flex-row sm:items-center">
           <div className="flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-[#1A0A00] bg-[#D4A017] text-4xl shadow-[3px_3px_0px_#1A0A00]">
             {user?.image_profile
-              ? <img src={user.image_profile} alt={user.name} className="h-full w-full rounded-full object-cover" />
+              ? // A foto é uma URL qualquer informada pelo usuário; o next/image exigiria liberar cada domínio.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={user.image_profile} alt={user.name} className="h-full w-full rounded-full object-cover" />
               : "🐼"
             }
           </div>

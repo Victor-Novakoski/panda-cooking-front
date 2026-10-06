@@ -20,6 +20,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       if (typeof window !== "undefined") {
         localStorage.removeItem("@pandaToken")
+        // Fora de componente não há router; a navegação completa também limpa o estado em memória.
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination
         window.location.href = "/auth/login"
       }
     }
