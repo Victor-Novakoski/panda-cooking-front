@@ -6,13 +6,14 @@ O PRD completo, com público e funcionalidades, fica na API: [panda-cooking-go-a
 
 | Tela | Rota | Login | Situação |
 | --- | --- | --- | --- |
-| Página inicial | `/` | — | ✅ |
+| Página inicial (com as receitas mais novas) | `/` | — | ✅ |
 | Entrar | `/auth/login` | — | ✅ |
-| Criar conta | `/auth/register` | — | ✅ |
-| Receitas (com busca) | `/dashboard` | — | ✅ |
-| Receita (ingredientes, preparo, comentários, favoritar) | `/recipes/[id]` | para comentar e favoritar | ✅ |
+| Criar conta (entra direto depois) | `/auth/register` | — | ✅ |
+| Receitas: busca, filtro por categoria e paginação, tudo na URL | `/dashboard` | — | ✅ |
+| Receita (fotos, ingredientes, preparo, comentários, favoritar) | `/recipes/[id]` | para comentar e favoritar | ✅ |
 | Nova receita | `/recipes/new` | ✅ | ✅ |
-| Perfil (minhas receitas e favoritas) | `/profile` | ✅ | ✅ |
+| Perfil (minhas receitas e favoritas, paginadas) | `/profile` | ✅ | ✅ |
 | Editar e apagar receita (só quem criou) | `/recipes/[id]/edit` | ✅ | ✅ |
-| Editar perfil (nome e foto) | `/profile/edit` | ✅ | ✅ |
-| Editar comentário (na página da receita) | `/recipes/[id]` | ✅ | ✅ |
+| Editar perfil (nome e foto) e apagar conta | `/profile/edit` | ✅ | ✅ |
+| Editar e apagar comentário (na página da receita) | `/recipes/[id]` | ✅ | ✅ |
+| Página não encontrada e erro inesperado | — | — | ✅ |

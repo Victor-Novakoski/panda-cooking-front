@@ -1,4 +1,4 @@
-import { refreshSession } from "@/services/api"
+import { apiStatus, refreshSession } from "@/services/api"
 import { authService } from "@/services/auth.service"
 import { useAuthStore } from "@/store/auth.store"
 
@@ -19,16 +19,20 @@ export async function restoreSession(hasSession: boolean) {
   }
 }
 
-// Sai mesmo se a API não responder: o access token some da memória e o
-// refresh token vence sozinho.
-export async function logout() {
+// Encerra a sessão na API e só então na tela. Se a API não responder, a
+// sessão continua (o cookie de refresh vale por dias e traria a pessoa de
+// volta ao recarregar): devolve false para a tela avisar, em vez de fingir
+// que saiu, o que num computador compartilhado deixaria a conta aberta.
+export async function logout(): Promise<boolean> {
   try {
     await authService.logout()
-  } catch {
-    // segue saindo
+  } catch (error) {
+    // 401: a sessão já tinha acabado, sair é o que se queria
+    if (apiStatus(error) !== 401) return false
   }
   useAuthStore.getState().clearSession(true)
   announce("logout")
+  return true
 }
 
 // Avisa as outras abas do site. O access token de cada aba vive na memória

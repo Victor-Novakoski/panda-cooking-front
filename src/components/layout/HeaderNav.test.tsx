@@ -46,4 +46,16 @@ describe("HeaderNav", () => {
     expect(push).toHaveBeenCalledWith("/")
     expect(screen.getByRole("link", { name: "Entrar" })).toBeInTheDocument()
   })
+
+  it("se a API não responder ao sair, avisa e continua logado", async () => {
+    vi.mocked(authService.logout).mockRejectedValue(new Error("rede"))
+    loginAs({ name: "Maria Silva" })
+    renderWithClient(<HeaderNav />)
+
+    await userEvent.setup().click(screen.getByRole("button", { name: "Sair" }))
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Não foi possível sair")
+    expect(useAuthStore.getState().status).toBe("authenticated")
+    expect(push).not.toHaveBeenCalled()
+  })
 })

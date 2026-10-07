@@ -30,14 +30,29 @@ export function capitalize(text: string) {
 
 // Caminho para onde voltar depois do login (?next=). Só aceita caminho do
 // próprio site: "//outro.site" ou "https://..." viraria um redirecionamento
-// para fora (open redirect).
+// para fora (open redirect). Em vez de conferir prefixos, resolve o endereço
+// como o navegador faria (que ignora tab e quebra de linha: "/\t/evil.com"
+// vira "//evil.com") e confere se continua na mesma origem.
+const BASE = "http://mesmo-site.invalid"
 export function safeNextPath(next: string | null | undefined, fallback = "/dashboard") {
-  if (!next || !next.startsWith("/") || next.startsWith("//") || next.includes("\\")) {
+  if (!next || !next.startsWith("/")) return fallback
+  let url: URL
+  try {
+    url = new URL(next, BASE)
+  } catch {
     return fallback
   }
-  return next
+  if (url.origin !== BASE) return fallback
+  return url.pathname + url.search + url.hash
 }
 
 export function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })
+  // Fuso fixo: a página é renderizada no servidor, que costuma estar em UTC,
+  // e a receita das 22h apareceria com a data do dia seguinte.
+  return new Date(iso).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "America/Sao_Paulo",
+  })
 }

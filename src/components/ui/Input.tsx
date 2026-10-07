@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { InputHTMLAttributes, forwardRef } from "react"
+import { InputHTMLAttributes, forwardRef, useId } from "react"
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string
@@ -11,8 +11,12 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, hint, id, ...props }, ref) => {
-    const describedBy = id && (error || hint) ? `${id}-help` : undefined
+  ({ className, label, error, hint, id: givenId, ...props }, ref) => {
+    // id gerado quando não vem um: o erro precisa de um para ficar ligado ao
+    // campo (aria-describedby) e ser lido pelo leitor de tela
+    const autoId = useId()
+    const id = givenId ?? autoId
+    const describedBy = error || hint ? `${id}-help` : undefined
     return (
       <div className="flex flex-col gap-1">
         {label && (

@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getRecipe } from "@/lib/server-api"
-import { formatDate } from "@/lib/utils"
+import { formatDate, isHttpsUrl } from "@/lib/utils"
 import { Header } from "@/components/layout/Header"
 import { FavoriteButton } from "@/components/recipe/FavoriteButton"
 import { CommentSection } from "@/components/recipe/CommentSection"
@@ -80,7 +80,7 @@ export default async function RecipePage({ params }: PageProps) {
 
             {gallery.length > 0 && (
               <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-                {gallery.map((image, index) => (
+                {gallery.filter((image) => isHttpsUrl(image.url)).map((image, index) => (
                   <a
                     key={image.id}
                     href={image.url}

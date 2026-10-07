@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { capitalize, isHttpsUrl, safeNextPath, utf8Length } from "./utils"
+import { capitalize, formatDate, isHttpsUrl, safeNextPath, utf8Length } from "./utils"
 
 describe("isHttpsUrl", () => {
   it.each([
@@ -27,6 +27,11 @@ describe("safeNextPath", () => {
     ["//outro.site", "/dashboard"],
     ["/\\outro.site", "/dashboard"],
     ["profile", "/dashboard"],
+    // o navegador ignora tab e quebra de linha: "/\t/outro.site" vira "//outro.site"
+    ["/\t/outro.site", "/dashboard"],
+    ["/\n/outro.site", "/dashboard"],
+    ["/\r\n/outro.site", "/dashboard"],
+    ["/%2F/outro.site", "/%2F/outro.site"],
   ])("%s → %s", (next, expected) => {
     expect(safeNextPath(next)).toBe(expected)
   })
@@ -40,4 +45,9 @@ it("utf8Length conta bytes, não letras", () => {
 it("capitalize deixa só a primeira letra maiúscula", () => {
   expect(capitalize("campo obrigatório")).toBe("Campo obrigatório")
   expect(capitalize("")).toBe("")
+})
+
+it("formatDate usa o horário de Brasília, não o do servidor", () => {
+  // 23h de 6/10 em Brasília já é 7/10 em UTC
+  expect(formatDate("2026-10-07T02:00:00Z")).toMatch(/^06/)
 })

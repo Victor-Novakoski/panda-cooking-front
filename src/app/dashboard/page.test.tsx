@@ -66,6 +66,26 @@ describe("DashboardPage", () => {
     expect(replace).toHaveBeenCalledWith("/dashboard?q=p%C3%A3o+de+queijo", { scroll: false })
   })
 
+  it("o texto digitado fica no campo enquanto a URL ainda não mudou", async () => {
+    renderWithClient(<DashboardPage />)
+    const input = screen.getByLabelText("Buscar receitas")
+
+    await userEvent.setup().type(input, "pao")
+    await vi.waitFor(() => expect(replace).toHaveBeenCalled())
+
+    // o router (mockado) ainda não atualizou o searchParams, como numa
+    // navegação que espera o servidor
+    expect(input).toHaveValue("pao")
+  })
+
+  it("URL editada à mão com valores que a API recusaria vira o mais próximo aceito", async () => {
+    searchParams = new URLSearchParams({ q: "x".repeat(150), categoria: "1.5", pagina: "1e20" })
+    renderWithClient(<DashboardPage />)
+
+    await screen.findByText("Bolo de Cenoura")
+    expect(recipesService.list).toHaveBeenCalledWith({ search: "x".repeat(100), category_id: undefined, page: 10_000 })
+  })
+
   it("filtra por categoria e desmarca clicando de novo", async () => {
     renderWithClient(<DashboardPage />)
     const user = userEvent.setup()

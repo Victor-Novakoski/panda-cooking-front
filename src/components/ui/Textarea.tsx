@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { TextareaHTMLAttributes, forwardRef } from "react"
+import { TextareaHTMLAttributes, forwardRef, useId } from "react"
 
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string
@@ -11,8 +11,11 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, label, error, counter, id, ...props }, ref) => {
+  ({ className, label, error, counter, id: givenId, ...props }, ref) => {
     const over = counter ? counter.length > counter.max : false
+    const autoId = useId()
+    const id = givenId ?? autoId
+    const errorId = error ? `${id}-error` : undefined
     return (
       <div className="flex flex-col gap-1">
         {label && (
@@ -24,6 +27,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={id}
           aria-invalid={!!error || over || undefined}
+          aria-describedby={errorId}
           className={cn(
             "w-full resize-none rounded-xl border-[3px] border-[#1A0A00] bg-white px-3 py-2 text-sm font-semibold text-[#1A0A00] placeholder:text-[#1A0A00]/30 shadow-[2px_2px_0px_#1A0A00] focus:border-[#C0392B] focus:outline-none",
             (error || over) && "border-[#C0392B] shadow-[2px_2px_0px_#C0392B]",
@@ -33,7 +37,9 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         />
         {(error || counter) && (
           <div className="flex items-start justify-between gap-3">
-            <span className="text-xs font-bold text-[#C0392B]">{error}</span>
+            <span id={errorId} className="text-xs font-bold text-[#C0392B]">
+              {error}
+            </span>
             {counter && (
               <span className={cn("shrink-0 text-xs font-bold", over ? "text-[#C0392B]" : "text-[#1A0A00]/40")}>
                 {counter.length}/{counter.max}

@@ -10,7 +10,17 @@ export const MAX_BODY_BYTES = 1 << 20
 
 export const API_TIMEOUT_MS = 15_000
 
-const FORWARDED_REQUEST_HEADERS = ["accept", "authorization", "content-type", "cookie", "x-forwarded-for", "x-request-id"]
+const FORWARDED_REQUEST_HEADERS = ["accept", "authorization", "content-type", "cookie", "x-request-id"]
+
+// IP de quem acessa, para os limites por IP da API: só o último endereço do
+// X-Forwarded-For, o que o proxy na frente do front anotou. Os anteriores
+// vêm do próprio cliente e podem ser inventados. Sem proxy na frente (dev),
+// o Next só preenche o header quando ele não veio, então o valor ainda pode
+// ser falso; em produção o proxy reverso precisa sobrescrevê-lo.
+export function clientIP(headers: Headers): string | undefined {
+  const last = headers.get("x-forwarded-for")?.split(",").at(-1)?.trim()
+  return last || undefined
+}
 const FORWARDED_RESPONSE_HEADERS = ["content-type", "location", "retry-after", "www-authenticate", "x-request-id"]
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"])
@@ -84,6 +94,8 @@ export async function forward(request: Request, apiUrl: string): Promise<Respons
     const value = request.headers.get(name)
     if (value) headers.set(name, value)
   }
+  const ip = clientIP(request.headers)
+  if (ip) headers.set("x-forwarded-for", ip)
 
   let body: Uint8Array<ArrayBuffer> | undefined
   try {

@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { MAX_BODY_BYTES, forward, isSameOrigin } from "./bff"
+import { MAX_BODY_BYTES, clientIP, forward, isSameOrigin } from "./bff"
 
 const API = "http://api:8080"
 const fetchMock = vi.fn<typeof fetch>()
@@ -151,6 +151,31 @@ describe("forward", () => {
     const res = await forward(request("/api/recipes"), API)
 
     expect(res.status).toBe(504)
+  })
+})
+
+describe("clientIP", () => {
+  it.each([
+    ["203.0.113.7", "203.0.113.7"],
+    // o cliente inventou o primeiro; o último foi o proxy que anotou
+    ["1.2.3.4, 203.0.113.7", "203.0.113.7"],
+    ["1.2.3.4,  203.0.113.7 ", "203.0.113.7"],
+    [null, undefined],
+    ["", undefined],
+  ])("%s → %s", (header, expected) => {
+    const headers = new Headers(header === null ? {} : { "x-forwarded-for": header })
+    expect(clientIP(headers)).toBe(expected)
+  })
+
+  it("forward repassa só o último endereço", async () => {
+    fetchMock.mockReset()
+    fetchMock.mockResolvedValue(Response.json({ ok: true }))
+    vi.stubGlobal("fetch", fetchMock)
+
+    await forward(request("/api/recipes", { headers: { "x-forwarded-for": "6.6.6.6, 203.0.113.7" } }), API)
+
+    expect(upstreamCall().headers.get("x-forwarded-for")).toBe("203.0.113.7")
+    vi.unstubAllGlobals()
   })
 })
 

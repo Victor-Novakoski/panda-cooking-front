@@ -2,6 +2,7 @@ import "server-only"
 import { cache } from "react"
 import { headers } from "next/headers"
 import type { Page, Recipe, RecipeSummary } from "@/types"
+import { clientIP } from "@/lib/bff"
 
 // Chamadas feitas no servidor do Next (páginas renderizadas lá). Vão direto
 // para a API pela rede interna, sem passar pelo /api do próprio front.
@@ -12,8 +13,8 @@ const API_URL = process.env.API_URL || "http://localhost:8080"
 async function forwardedHeaders(): Promise<HeadersInit> {
   const incoming = await headers()
   const out: Record<string, string> = { Accept: "application/json" }
-  const forwardedFor = incoming.get("x-forwarded-for")
-  if (forwardedFor) out["X-Forwarded-For"] = forwardedFor
+  const ip = clientIP(incoming)
+  if (ip) out["X-Forwarded-For"] = ip
   return out
 }
 

@@ -5,7 +5,10 @@ import { authService } from "@/services/auth.service"
 import { useAuthStore } from "@/store/auth.store"
 import { apiError, loginAs } from "@/test/utils"
 
-vi.mock("@/services/api", () => ({ refreshSession: vi.fn() }))
+vi.mock("@/services/api", () => ({
+  refreshSession: vi.fn(),
+  apiStatus: (error: { response?: { status?: number } }) => error?.response?.status,
+}))
 vi.mock("@/services/auth.service", () => ({ authService: { logout: vi.fn() } }))
 
 describe("restoreSession", () => {
@@ -50,18 +53,25 @@ describe("logout", () => {
     loginAs()
     vi.mocked(authService.logout).mockResolvedValue()
 
-    await logout()
+    expect(await logout()).toBe(true)
 
     expect(authService.logout).toHaveBeenCalled()
     expect(useAuthStore.getState()).toMatchObject({ status: "anonymous", endedHere: true })
   })
 
-  it("sai mesmo se a API não responder", async () => {
+  it("sessão que já tinha acabado (401) também conta como saída", async () => {
+    loginAs()
+    vi.mocked(authService.logout).mockRejectedValue(apiError(401))
+
+    expect(await logout()).toBe(true)
+    expect(useAuthStore.getState().token).toBeNull()
+  })
+
+  it("API fora do ar: não finge que saiu, porque o cookie traria a sessão de volta", async () => {
     loginAs()
     vi.mocked(authService.logout).mockRejectedValue(new Error("rede"))
 
-    await logout()
-
-    expect(useAuthStore.getState().token).toBeNull()
+    expect(await logout()).toBe(false)
+    expect(useAuthStore.getState().status).toBe("authenticated")
   })
 })

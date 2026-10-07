@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import { useRecipeList } from "@/hooks/useRecipes"
 import { categoriesService } from "@/services/categories.service"
-import { SEARCH_MAX } from "@/lib/limits"
+import { PAGE_MAX, SEARCH_MAX } from "@/lib/limits"
 import { cn } from "@/lib/utils"
 import { Header } from "@/components/layout/Header"
 import { RecipeGrid, RecipeGridSkeleton } from "@/components/recipe/RecipeGrid"
@@ -36,9 +36,12 @@ function RecipeBrowser() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const q = searchParams.get("q") ?? ""
-  const categoryId = Number(searchParams.get("categoria")) || undefined
-  const page = Math.max(1, Math.trunc(Number(searchParams.get("pagina"))) || 1)
+  // A URL pode ter sido editada à mão: valores que a API recusaria viram o
+  // mais próximo que ela aceita, em vez de uma tela de erro sem saída.
+  const q = (searchParams.get("q") ?? "").slice(0, SEARCH_MAX)
+  const rawCategory = Number(searchParams.get("categoria"))
+  const categoryId = Number.isInteger(rawCategory) && rawCategory > 0 ? rawCategory : undefined
+  const page = Math.min(PAGE_MAX, Math.max(1, Math.trunc(Number(searchParams.get("pagina"))) || 1))
 
   const { data: categories } = useQuery({
     queryKey: ["categories"],
@@ -50,14 +53,18 @@ function RecipeBrowser() {
   // O campo de busca é atualizado na hora; a URL (e a busca na API) só
   // depois de 300 ms sem digitar.
   const [search, setSearch] = useState(q)
-  const [syncedQ, setSyncedQ] = useState(q)
+  const [prevQ, setPrevQ] = useState(q)
+  // último q que o próprio campo mandou para a URL
+  const [typedQ, setTypedQ] = useState<string | null>(null)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
   useEffect(() => () => clearTimeout(timer.current), [])
 
-  // A URL mudou por fora (voltar, avançar, link): o campo acompanha.
-  if (q !== syncedQ) {
-    setSyncedQ(q)
-    setSearch(q)
+  // A URL mudou por fora (voltar, avançar, link): o campo acompanha. Se foi
+  // o próprio campo que mudou a URL, o texto fica como está: a navegação
+  // termina depois, e a pessoa pode já ter digitado mais.
+  if (q !== prevQ) {
+    setPrevQ(q)
+    if (q !== typedQ) setSearch(q)
   }
 
   function updateParams(changes: Record<string, string | undefined>) {
@@ -77,7 +84,7 @@ function RecipeBrowser() {
     clearTimeout(timer.current)
     timer.current = setTimeout(() => {
       const next = value.trim()
-      setSyncedQ(next)
+      setTypedQ(next)
       updateParams({ q: next || undefined, pagina: undefined })
     }, 300)
   }
@@ -85,7 +92,7 @@ function RecipeBrowser() {
   function clearFilters() {
     clearTimeout(timer.current)
     setSearch("")
-    setSyncedQ("")
+    setTypedQ("")
     router.replace(pathname, { scroll: false })
   }
 
@@ -154,7 +161,16 @@ function RecipeBrowser() {
 
       {isError && !data && (
         <Notice emoji="😕" title="Não foi possível carregar as receitas." role="alert">
-          Tente de novo daqui a pouco.
+          Tente de novo daqui a pouco
+          {hasFilters || page > 1 ? (
+            <>
+              {" ou "}
+              <button type="button" onClick={clearFilters} className="font-black text-[#C0392B] hover:underline">
+                limpe a busca e os filtros
+              </button>
+            </>
+          ) : null}
+          .
         </Notice>
       )}
 

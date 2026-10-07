@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
@@ -18,8 +19,14 @@ export function HeaderNav() {
 
   const isActive = (href: string) => pathname === href
 
+  const [logoutFailed, setLogoutFailed] = useState(false)
+
   async function handleLogout() {
-    await logout()
+    setLogoutFailed(false)
+    if (!(await logout())) {
+      setLogoutFailed(true)
+      return
+    }
     queryClient.removeQueries({ queryKey: ME_KEY })
     router.push("/")
   }
@@ -61,6 +68,14 @@ export function HeaderNav() {
         >
           <LogOut className="h-4 w-4" />
         </button>
+        {logoutFailed && (
+          <p
+            role="alert"
+            className="fixed right-4 top-20 z-50 rounded-xl border-[3px] border-[#1A0A00] bg-white px-4 py-2 text-sm font-bold text-[#C0392B] shadow-[3px_3px_0px_#1A0A00]"
+          >
+            Não foi possível sair. Confira sua conexão e tente de novo.
+          </p>
+        )}
       </div>
     )
   }

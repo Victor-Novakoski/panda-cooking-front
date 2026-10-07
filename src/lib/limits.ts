@@ -32,6 +32,8 @@ export const RECIPE = {
 export const COMMENT_MAX = 1000
 
 export const SEARCH_MAX = 100
+// maior página que a API aceita
+export const PAGE_MAX = 10_000
 
 export const PER_PAGE = {
   recipes: 12,
