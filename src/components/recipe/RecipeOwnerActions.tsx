@@ -4,8 +4,8 @@ import Link from "next/link"
 import { useAuthStore } from "@/store/auth.store"
 import { Pencil } from "lucide-react"
 
-// A página da receita é renderizada no servidor, que não sabe quem está logado;
-// o botão de editar aparece no navegador, só para quem criou a receita.
+// A página da receita é renderizada no servidor, que não sabe quem está
+// logado; o botão de editar aparece no navegador, só para quem criou a receita.
 export function RecipeOwnerActions({ recipeId, ownerId }: { recipeId: string; ownerId: string }) {
   const user = useAuthStore((s) => s.user)
   if (!user || user.id !== ownerId) return null

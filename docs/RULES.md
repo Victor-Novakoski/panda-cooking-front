@@ -22,8 +22,10 @@ Checklist para toda mudança (detalhes em [SECURITY.md](SECURITY.md)):
 
 - [ ] Formulário valida com Zod usando os mesmos limites da API (é só para o usuário; quem protege é a API).
 - [ ] Nada de `dangerouslySetInnerHTML` com dado do usuário; link e imagem vindos do usuário só com `http`/`https`.
-- [ ] Rota que exige login está no `proxy.ts`.
-- [ ] Nenhum segredo no código: no front tudo é público, inclusive `NEXT_PUBLIC_*`.
+- [ ] Rota que exige login está no `proxy.ts` e a página usa `useRequireAuth`.
+- [ ] Dado de quem está logado fica sob a chave `["me"]` do TanStack Query.
+- [ ] Nenhum segredo no código; nada de `NEXT_PUBLIC_*` com o que não pode ser público (vai para o navegador).
+- [ ] Nada da sessão no `localStorage`: o access token fica só em memória.
 - [ ] Dependência nova é necessária, mantida e passa no `npm audit`.
 - [ ] Nada de código, nome de cliente ou padrão interno de outra empresa no repositório.
 

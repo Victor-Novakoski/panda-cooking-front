@@ -1,29 +1,20 @@
 import { api } from "./api"
-import { User } from "@/types"
+import type { AuthResult } from "@/types"
 
-interface LoginPayload {
-  email: string
-  password: string
-}
-
-interface RegisterPayload {
-  name: string
+export interface LoginPayload {
   email: string
   password: string
 }
 
 export const authService = {
-  login: async (data: LoginPayload): Promise<{ token: string; user: User }> => {
-    const { data: tokenData } = await api.post<{ token: string }>("/auth", data)
-    // O token ainda não está salvo, então vai só nesta chamada (não fica no axios depois do logout).
-    const { data: user } = await api.get<User>("/users/profile", {
-      headers: { Authorization: `Bearer ${tokenData.token}` },
-    })
-    return { token: tokenData.token, user }
+  // A API grava o refresh token no cookie HttpOnly e devolve o access token no corpo.
+  login: async (data: LoginPayload): Promise<AuthResult> => {
+    const res = await api.post<AuthResult>("/auth/login", data)
+    return res.data
   },
 
-  register: async (data: RegisterPayload): Promise<User> => {
-    const res = await api.post<User>("/users", data)
-    return res.data
+  // Encerra a sessão no banco e apaga os cookies.
+  logout: async (): Promise<void> => {
+    await api.post("/auth/logout")
   },
 }
