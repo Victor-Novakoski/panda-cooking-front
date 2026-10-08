@@ -14,7 +14,7 @@ Regras que valem para qualquer mudança. Se uma regra atrapalhar, ela é discuti
 - TypeScript estrito; nada de `any` sem comentário dizendo o porquê.
 - Componentes e cores seguem [DESIGN.md](DESIGN.md).
 - Identificadores em inglês; textos da tela, comentários, docs e commits em português.
-- `npm run lint` e `npm run typecheck` limpos, sem warning.
+- `npm run lint`, `npm run typecheck` e `npm test` limpos, sem warning.
 
 ## 3. Segurança
 
@@ -22,14 +22,19 @@ Checklist para toda mudança (detalhes em [SECURITY.md](SECURITY.md)):
 
 - [ ] Formulário valida com Zod usando os mesmos limites da API (é só para o usuário; quem protege é a API).
 - [ ] Nada de `dangerouslySetInnerHTML` com dado do usuário; link e imagem vindos do usuário só com `http`/`https`.
-- [ ] Rota que exige login está no `proxy.ts`.
-- [ ] Nenhum segredo no código: no front tudo é público, inclusive `NEXT_PUBLIC_*`.
+- [ ] Rota que exige login está no `proxy.ts` e a página usa `useRequireAuth`.
+- [ ] Dado de quem está logado fica sob a chave `["me"]` do TanStack Query.
+- [ ] Nenhum segredo no código; nada de `NEXT_PUBLIC_*` com o que não pode ser público (vai para o navegador).
+- [ ] Nada da sessão no `localStorage`: o access token fica só em memória.
 - [ ] Dependência nova é necessária, mantida e passa no `npm audit`.
 - [ ] Nada de código, nome de cliente ou padrão interno de outra empresa no repositório.
 
 ## 4. Testes
 
-- Ainda não há testes automatizados no front (ver [TASKS.md](TASKS.md)). Até lá, toda mudança é conferida rodando contra a API local.
+- Vitest + Testing Library; `npm test` roda tudo e a CI exige verde.
+- Correção de bug vem com um teste que falha sem a correção.
+- Teste fica ao lado do arquivo testado e testa comportamento (o que aparece na tela, o que vai para a API), não detalhe de implementação.
+- Nada de rede de verdade nos testes: mocka o service ou o adapter do axios.
 - `npm run build` passando antes de qualquer commit.
 
 ## 5. API

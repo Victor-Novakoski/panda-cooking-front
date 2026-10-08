@@ -1,15 +1,22 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { InputHTMLAttributes, forwardRef } from "react"
+import { InputHTMLAttributes, forwardRef, useId } from "react"
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string
   error?: string
+  // dica embaixo do campo (some quando há erro)
+  hint?: string
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, id, ...props }, ref) => {
+  ({ className, label, error, hint, id: givenId, ...props }, ref) => {
+    // id gerado quando não vem um: o erro precisa de um para ficar ligado ao
+    // campo (aria-describedby) e ser lido pelo leitor de tela
+    const autoId = useId()
+    const id = givenId ?? autoId
+    const describedBy = error || hint ? `${id}-help` : undefined
     return (
       <div className="flex flex-col gap-1">
         {label && (
@@ -20,6 +27,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           id={id}
+          aria-invalid={!!error || undefined}
+          aria-describedby={describedBy}
           className={cn(
             "h-11 w-full rounded-xl border-[3px] border-[#1A0A00] bg-white px-3 text-sm font-semibold text-[#1A0A00] placeholder:text-[#1A0A00]/30 shadow-[2px_2px_0px_#1A0A00] focus:outline-none focus:border-[#C0392B] focus:shadow-[3px_3px_0px_#C0392B] transition-all",
             error && "border-[#C0392B] shadow-[2px_2px_0px_#C0392B]",
@@ -27,7 +36,17 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
           {...props}
         />
-        {error && <span className="text-xs font-bold text-[#C0392B]">{error}</span>}
+        {error ? (
+          <span id={describedBy} className="text-xs font-bold text-[#C0392B]">
+            {error}
+          </span>
+        ) : (
+          hint && (
+            <span id={describedBy} className="text-xs font-semibold text-[#1A0A00]/50">
+              {hint}
+            </span>
+          )
+        )}
       </div>
     )
   }

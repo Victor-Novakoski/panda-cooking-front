@@ -1,7 +1,8 @@
 import { api } from "./api"
-import { Recipe } from "@/types"
+import { PER_PAGE } from "@/lib/limits"
+import type { Page, Recipe, RecipeSummary } from "@/types"
 
-interface CreateRecipePayload {
+export interface RecipePayload {
   name: string
   description: string
   time: string
@@ -12,28 +13,39 @@ interface CreateRecipePayload {
   preparations: { description: string }[]
 }
 
+export interface RecipeFilters {
+  search?: string
+  category_id?: number
+  user_id?: string
+  page?: number
+}
+
 export const recipesService = {
-  getAll: async (): Promise<Recipe[]> => {
-    const res = await api.get("/recipes")
+  // Das mais novas para as mais antigas. A busca ignora acento e maiúscula.
+  list: async ({ search, category_id, user_id, page = 1 }: RecipeFilters = {}): Promise<Page<RecipeSummary>> => {
+    const res = await api.get<Page<RecipeSummary>>("/recipes", {
+      params: { search: search || undefined, category_id, user_id, page, per_page: PER_PAGE.recipes },
+    })
     return res.data
   },
 
   getById: async (id: string): Promise<Recipe> => {
-    const res = await api.get(`/recipes/${id}`)
+    const res = await api.get<Recipe>(`/recipes/${encodeURIComponent(id)}`)
     return res.data
   },
 
-  create: async (data: CreateRecipePayload): Promise<Recipe> => {
-    const res = await api.post("/recipes", data)
+  create: async (data: RecipePayload): Promise<Recipe> => {
+    const res = await api.post<Recipe>("/recipes", data)
     return res.data
   },
 
-  update: async (id: string, data: Partial<CreateRecipePayload>): Promise<Recipe> => {
-    const res = await api.patch(`/recipes/${id}`, data)
+  // Troca a receita inteira (dados, fotos, ingredientes e passos) numa transação na API.
+  replace: async (id: string, data: RecipePayload): Promise<Recipe> => {
+    const res = await api.put<Recipe>(`/recipes/${encodeURIComponent(id)}`, data)
     return res.data
   },
 
   delete: async (id: string): Promise<void> => {
-    await api.delete(`/recipes/${id}`)
+    await api.delete(`/recipes/${encodeURIComponent(id)}`)
   },
 }

@@ -1,43 +1,38 @@
 import { create } from "zustand"
-import { persist } from "zustand/middleware"
-import { User } from "@/types"
+import type { User } from "@/types"
+
+// loading: ainda conferindo a sessão (logo que a página abre)
+// authenticated: tem access token
+// anonymous: sem sessão
+// unavailable: não deu para conferir (API fora do ar); não manda para o
+// login, senão a pessoa entraria num vai e volta com a sessão ainda válida
+export type SessionStatus = "loading" | "authenticated" | "anonymous" | "unavailable"
 
 interface AuthState {
   user: User | null
+  // Access token só em memória: some ao fechar a aba e um XSS não acha nada
+  // no localStorage. O refresh token fica no cookie HttpOnly, que o
+  // JavaScript não lê; é com ele que a sessão volta ao recarregar a página.
   token: string | null
-  setAuth: (user: User, token: string) => void
-  clearAuth: () => void
-  isAuthenticated: () => boolean
+  status: SessionStatus
+  // A sessão acabou por ação da pessoa nesta aba (Sair, apagar a conta):
+  // quem chamou já leva para a página certa, as páginas protegidas não
+  // mandam para o login.
+  endedHere: boolean
+  setSession: (user: User, token: string) => void
+  // Depois de editar o perfil: troca os dados do usuário e mantém a sessão.
+  setUser: (user: User) => void
+  clearSession: (endedHere?: boolean) => void
+  setStatus: (status: SessionStatus) => void
 }
 
-function setCookie(name: string, value: string) {
-  document.cookie = `${name}=${value}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-}
-
-function deleteCookie(name: string) {
-  document.cookie = `${name}=; path=/; max-age=0`
-}
-
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
-      user: null,
-      token: null,
-      setAuth: (user, token) => {
-        localStorage.setItem("@pandaToken", token)
-        setCookie("@pandaToken", token)
-        set({ user, token })
-      },
-      clearAuth: () => {
-        localStorage.removeItem("@pandaToken")
-        deleteCookie("@pandaToken")
-        set({ user: null, token: null })
-      },
-      isAuthenticated: () => !!get().token,
-    }),
-    {
-      name: "panda-auth",
-      partialize: (state) => ({ user: state.user, token: state.token }),
-    }
-  )
-)
+export const useAuthStore = create<AuthState>()((set) => ({
+  user: null,
+  token: null,
+  status: "loading",
+  endedHere: false,
+  setSession: (user, token) => set({ user, token, status: "authenticated", endedHere: false }),
+  setUser: (user) => set({ user }),
+  clearSession: (endedHere = false) => set({ user: null, token: null, status: "anonymous", endedHere }),
+  setStatus: (status) => set({ status }),
+}))
