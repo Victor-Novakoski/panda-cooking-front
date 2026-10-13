@@ -8,6 +8,7 @@ import { FavoriteButton } from "@/components/recipe/FavoriteButton"
 import { CommentSection } from "@/components/recipe/CommentSection"
 import { RecipeOwnerActions } from "@/components/recipe/RecipeOwnerActions"
 import { RecipeImage } from "@/components/recipe/RecipeImage"
+import { PhotoCarousel } from "@/components/recipe/PhotoCarousel"
 import { portionsLabel } from "@/components/recipe/format"
 import { Avatar } from "@/components/user/Avatar"
 import { ArrowLeft, ChefHat, Clock, Users } from "lucide-react"
@@ -34,6 +35,7 @@ export default async function RecipePage({ params }: PageProps) {
   if (!recipe) notFound()
 
   const [cover, ...gallery] = recipe.images
+  const photos = gallery.filter((image) => isImageUrl(image.url))
 
   return (
     <>
@@ -78,27 +80,7 @@ export default async function RecipePage({ params }: PageProps) {
               {recipe.description}
             </p>
 
-            {gallery.length > 0 && (
-              <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-                {gallery.filter((image) => isImageUrl(image.url)).map((image, index) => (
-                  <a
-                    key={image.id}
-                    href={image.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="relative aspect-square overflow-hidden rounded-xl border-[3px] border-[#1A0A00] bg-[#F5E6C8] shadow-[3px_3px_0px_#1A0A00] transition-transform hover:-translate-y-0.5"
-                  >
-                    <RecipeImage
-                      src={image.url}
-                      alt={`${recipe.name}, foto ${index + 2}`}
-                      fill
-                      sizes="(min-width: 640px) 160px, 33vw"
-                      className="object-cover"
-                    />
-                  </a>
-                ))}
-              </div>
-            )}
+            {photos.length > 0 && <PhotoCarousel images={photos} name={recipe.name} />}
 
             <section className="rounded-2xl border-[3px] border-[#1A0A00] bg-white p-6 shadow-[4px_4px_0px_#1A0A00]">
               <div className="mb-5 flex items-center gap-3">

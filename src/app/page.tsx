@@ -38,10 +38,15 @@ export default async function Home() {
                 com sabor de aventura
               </h1>
 
-              <p className="mb-8 text-base leading-relaxed text-white/70">
+              <p className="mb-6 text-base leading-relaxed text-white/70">
                 De dim sum a ramen. Explore pratos da comunidade, salve seus favoritos e
                 compartilhe suas criações com o mundo.
               </p>
+
+              {/* Biscoito da sorte, como no Panda Cooking original */}
+              <div className="mb-8">
+                <FortuneCookie initial={phrase} />
+              </div>
 
               <div className="flex flex-wrap gap-3">
                 <Link
@@ -88,18 +93,6 @@ export default async function Home() {
             </div>
           ))}
         </div>
-
-        {/* Biscoito da sorte */}
-        <section className="mx-auto w-full max-w-3xl px-6 pt-16">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="h-8 w-1.5 rounded-full border-2 border-[#1A0A00] bg-[#D4A017]" />
-            <h2 className="text-2xl font-black text-[#1A0A00] sm:text-3xl">Biscoito da sorte</h2>
-          </div>
-          <FortuneCookie initial={phrase} />
-          <p className="mt-3 text-center text-xs font-bold text-[#1A0A00]/40 sm:text-left">
-            Clique no biscoito para abrir outro.
-          </p>
-        </section>
 
         {/* Receitas mais novas */}
         {latest.length > 0 && (

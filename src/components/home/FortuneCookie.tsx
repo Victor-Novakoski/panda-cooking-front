@@ -16,26 +16,24 @@ export function FortuneCookie({ initial }: { initial: number }) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 sm:flex-row sm:gap-8">
+    <div className="flex min-h-18 items-center gap-4">
       <button
         type="button"
         onClick={open}
         aria-label="Abrir outro biscoito da sorte"
-        className="fortune-cookie flex h-24 w-24 shrink-0 items-center justify-center rounded-full border-4 border-[#1A0A00] bg-[#D4A017] text-5xl shadow-[4px_4px_0px_#1A0A00] transition-[box-shadow,translate] hover:bg-[#F0C040] active:translate-x-1 active:translate-y-1 active:shadow-none"
+        title="Abrir outro biscoito"
+        className="fortune-cookie shrink-0 cursor-pointer text-5xl leading-none drop-shadow-[3px_3px_0_#5a0f0f] transition-transform active:scale-90"
       >
         <span aria-hidden>🥠</span>
       </button>
-
-      <div className="relative w-full flex-1 rounded-2xl border-[3px] border-[#1A0A00] bg-white px-6 py-5 shadow-[4px_4px_0px_#1A0A00]">
-        <p className="mb-1 text-[10px] font-black uppercase tracking-[3px] text-[#C0392B]">Sua sorte de hoje</p>
-        <p
-          key={opened}
-          aria-live="polite"
-          className="fortune-message text-lg font-black leading-snug text-[#1A0A00]"
-        >
-          &ldquo;{PHRASES[phrase]}&rdquo;
-        </p>
-      </div>
+      <p
+        key={opened}
+        aria-live="polite"
+        className="fortune-message text-base font-black italic leading-snug text-[#F0C040]"
+        style={{ textShadow: "2px 2px 0 #5a0f0f" }}
+      >
+        &ldquo;{PHRASES[phrase]}&rdquo;
+      </p>
     </div>
   )
 }
