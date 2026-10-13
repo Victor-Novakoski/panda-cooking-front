@@ -29,6 +29,16 @@ export function Header() {
 
         <nav className="flex items-center gap-1 sm:gap-2">
           <Link
+            href="/"
+            className={`rounded-lg px-2 py-2 text-sm font-bold transition-colors sm:px-4 ${
+              isActive("/")
+                ? "bg-white/20 text-[#F0C040]"
+                : "text-[#F0C040]/80 hover:bg-white/10 hover:text-[#F0C040]"
+            }`}
+          >
+            Início
+          </Link>
+          <Link
             href="/recipes"
             className={`rounded-lg px-3 py-2 text-sm font-bold transition-colors sm:px-4 ${
               isActive("/recipes")
