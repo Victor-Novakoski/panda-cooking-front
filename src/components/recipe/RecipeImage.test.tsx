@@ -1,8 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react"
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { RecipeImage, canOptimize } from "./RecipeImage"
 
 describe("RecipeImage", () => {
+  afterEach(() => vi.restoreAllMocks())
+
   it("foto do Unsplash passa pelo otimizador do Next", () => {
     render(<RecipeImage src="https://images.unsplash.com/foto.jpg" alt="Bolo" width={100} height={100} />)
 
@@ -29,6 +31,25 @@ describe("RecipeImage", () => {
     fireEvent.error(screen.getByRole("img", { name: "Bolo" }))
 
     expect(screen.getByRole("img", { name: "Bolo" })).toHaveTextContent("🍽️")
+  })
+
+  it("foto que falhou antes do React assumir a página também troca pela figura", () => {
+    // complete sem largura é o estado de uma imagem que o navegador já desistiu de carregar
+    vi.spyOn(HTMLImageElement.prototype, "complete", "get").mockReturnValue(true)
+    vi.spyOn(HTMLImageElement.prototype, "naturalWidth", "get").mockReturnValue(0)
+
+    render(<RecipeImage src="https://exemplo.com/sumiu.jpg" alt="Bolo" width={100} height={100} />)
+
+    expect(screen.getByRole("img", { name: "Bolo" })).toHaveTextContent("🍽️")
+  })
+
+  it("foto já carregada continua na tela", () => {
+    vi.spyOn(HTMLImageElement.prototype, "complete", "get").mockReturnValue(true)
+    vi.spyOn(HTMLImageElement.prototype, "naturalWidth", "get").mockReturnValue(800)
+
+    render(<RecipeImage src="https://exemplo.com/foto.jpg" alt="Bolo" width={100} height={100} />)
+
+    expect(screen.getByRole("img", { name: "Bolo" })).toHaveAttribute("src", "https://exemplo.com/foto.jpg")
   })
 
   it("canOptimize só aceita os sites liberados no next.config.ts", () => {
