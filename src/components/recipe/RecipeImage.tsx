@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import Image, { type ImageProps } from "next/image"
 import { isHttpsUrl } from "@/lib/utils"
 
@@ -27,6 +27,12 @@ type RecipeImageProps = Omit<ImageProps, "src" | "alt"> & {
 
 export function RecipeImage({ src, alt, fallback = "🍽️", ...props }: RecipeImageProps) {
   const [broken, setBroken] = useState(false)
+  // Uma foto que falha antes do React assumir a página (o HTML vem pronto do
+  // servidor) não dispara o onError e fica o ícone de imagem quebrada. Por
+  // isso a imagem é conferida também quando entra na tela.
+  const checkLoaded = useCallback((img: HTMLImageElement | null) => {
+    if (img?.complete && img.naturalWidth === 0) setBroken(true)
+  }, [])
 
   if (!src || broken || !isHttpsUrl(src)) {
     return (
@@ -44,6 +50,7 @@ export function RecipeImage({ src, alt, fallback = "🍽️", ...props }: Recipe
       unoptimized={!optimized}
       // sem referrer o site da foto não fica sabendo qual página a mostrou
       referrerPolicy={optimized ? undefined : "no-referrer"}
+      ref={checkLoaded}
       onError={() => setBroken(true)}
       {...props}
     />
