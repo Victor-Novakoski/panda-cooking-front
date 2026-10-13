@@ -50,7 +50,7 @@ Regras:
 | Página | Onde busca os dados | Por quê |
 | --- | --- | --- |
 | `/` e `/recipes/[id]` | servidor (`server-api.ts`) | conteúdo público: chega pronto no HTML, com título e prévia para link compartilhado |
-| `/dashboard` | navegador | busca, categoria e página mudam sem recarregar; ficam na URL (`?q=&categoria=&pagina=`) |
+| `/recipes` | navegador | busca, categoria e página mudam sem recarregar; ficam na URL (`?q=&categoria=&pagina=`) |
 | perfil, nova receita, edições | navegador | dependem de quem está logado |
 
 Todas as páginas são dinâmicas: o `proxy.ts` gera um nonce novo por requisição para a CSP, e o layout lê o cookie da sessão.

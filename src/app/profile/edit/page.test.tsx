@@ -63,7 +63,7 @@ describe("EditProfilePage", () => {
     await user.type(screen.getByLabelText("Link da foto (opcional)"), "http://exemplo.com/foto.jpg")
     await user.click(screen.getByRole("button", { name: "Salvar" }))
 
-    expect(await screen.findByText("Use um link que comece com https://")).toBeInTheDocument()
+    expect(await screen.findByText("Use um link que comece com https:// ou envie a foto do computador")).toBeInTheDocument()
     expect(usersService.update).not.toHaveBeenCalled()
   })
 

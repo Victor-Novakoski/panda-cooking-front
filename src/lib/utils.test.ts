@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { capitalize, formatDate, isHttpsUrl, safeNextPath, utf8Length } from "./utils"
+import { capitalize, formatDate, isHttpsUrl, isImageUrl, safeNextPath, utf8Length } from "./utils"
 
 describe("isHttpsUrl", () => {
   it.each([
@@ -17,20 +17,35 @@ describe("isHttpsUrl", () => {
   })
 })
 
+describe("isImageUrl", () => {
+  it("aceita link https e foto enviada do computador", () => {
+    expect(isImageUrl("https://exemplo.com/foto.jpg")).toBe(true)
+    expect(isImageUrl("/api/uploads/0b7c1d2e-3f4a-4b5c-8d9e-0f1a2b3c4d5e")).toBe(true)
+  })
+
+  it("recusa outros caminhos do site e links que não são https", () => {
+    expect(isImageUrl("/api/uploads/../users/profile")).toBe(false)
+    expect(isImageUrl("/api/uploads/123")).toBe(false)
+    expect(isImageUrl("//api/uploads/0b7c1d2e-3f4a-4b5c-8d9e-0f1a2b3c4d5e")).toBe(false)
+    expect(isImageUrl("http://exemplo.com/foto.jpg")).toBe(false)
+    expect(isImageUrl("javascript:alert(1)")).toBe(false)
+  })
+})
+
 describe("safeNextPath", () => {
   it.each([
     ["/profile", "/profile"],
     ["/recipes/abc?x=1", "/recipes/abc?x=1"],
-    [null, "/dashboard"],
-    ["", "/dashboard"],
-    ["https://outro.site", "/dashboard"],
-    ["//outro.site", "/dashboard"],
-    ["/\\outro.site", "/dashboard"],
-    ["profile", "/dashboard"],
+    [null, "/recipes"],
+    ["", "/recipes"],
+    ["https://outro.site", "/recipes"],
+    ["//outro.site", "/recipes"],
+    ["/\\outro.site", "/recipes"],
+    ["profile", "/recipes"],
     // o navegador ignora tab e quebra de linha: "/\t/outro.site" vira "//outro.site"
-    ["/\t/outro.site", "/dashboard"],
-    ["/\n/outro.site", "/dashboard"],
-    ["/\r\n/outro.site", "/dashboard"],
+    ["/\t/outro.site", "/recipes"],
+    ["/\n/outro.site", "/recipes"],
+    ["/\r\n/outro.site", "/recipes"],
     ["/%2F/outro.site", "/%2F/outro.site"],
   ])("%s → %s", (next, expected) => {
     expect(safeNextPath(next)).toBe(expected)

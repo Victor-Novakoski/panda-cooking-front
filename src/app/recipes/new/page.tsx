@@ -17,7 +17,9 @@ export default function NewRecipePage() {
   async function create(payload: RecipePayload) {
     const recipe = await recipesService.create(payload)
     queryClient.setQueryData(recipeKey(recipe.id), recipe)
-    queryClient.invalidateQueries({ queryKey: [...RECIPES_KEY, "list"] })
+    // Descarta as listas guardadas: ao voltar para elas, a receita já aparece,
+    // sem mostrar antes a lista antiga enquanto a nova chega.
+    queryClient.removeQueries({ queryKey: [...RECIPES_KEY, "list"] })
     router.push(`/recipes/${recipe.id}`)
   }
 

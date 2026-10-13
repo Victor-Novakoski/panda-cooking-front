@@ -80,6 +80,24 @@ describe("forward", () => {
     ])
   })
 
+  it("foto enviada mantém o cache e o CSP que a API mandou", async () => {
+    fetchMock.mockResolvedValue(
+      new Response(new Uint8Array([137, 80, 78, 71]), {
+        headers: {
+          "content-type": "image/png",
+          "cache-control": "public, max-age=31536000, immutable",
+          "content-security-policy": "default-src 'none'; sandbox",
+        },
+      })
+    )
+
+    const res = await forward(request("/api/uploads/0b7c1d2e-3f4a-4b5c-8d9e-0f1a2b3c4d5e"), API)
+
+    expect(res.headers.get("content-type")).toBe("image/png")
+    expect(res.headers.get("cache-control")).toBe("public, max-age=31536000, immutable")
+    expect(res.headers.get("content-security-policy")).toBe("default-src 'none'; sandbox")
+  })
+
   it("repassa o corpo dos métodos que mudam algo", async () => {
     await forward(
       request("/api/recipes", {

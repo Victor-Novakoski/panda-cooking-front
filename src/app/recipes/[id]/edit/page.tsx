@@ -27,7 +27,9 @@ export default function EditRecipePage() {
   async function save(payload: RecipePayload) {
     const updated = await recipesService.replace(id, payload)
     queryClient.setQueryData(recipeKey(id), updated)
-    queryClient.invalidateQueries({ queryKey: [...RECIPES_KEY, "list"] })
+    // Descarta as listas guardadas: ao voltar para elas, a receita já aparece,
+    // sem mostrar antes a lista antiga enquanto a nova chega.
+    queryClient.removeQueries({ queryKey: [...RECIPES_KEY, "list"] })
     router.push(`/recipes/${id}`)
     // A página da receita é renderizada no servidor; sem refresh, o Next mostraria a versão em cache do roteador.
     router.refresh()

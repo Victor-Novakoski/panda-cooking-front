@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react"
 import Image, { type ImageProps } from "next/image"
-import { isHttpsUrl } from "@/lib/utils"
+import { isImageUrl } from "@/lib/utils"
 
 // Fotos destes sites passam pelo otimizador do Next (tamanho certo para a
 // tela, WebP/AVIF). Precisa bater com images.remotePatterns do next.config.ts.
@@ -34,7 +34,7 @@ export function RecipeImage({ src, alt, fallback = "🍽️", ...props }: Recipe
     if (img?.complete && img.naturalWidth === 0) setBroken(true)
   }, [])
 
-  if (!src || broken || !isHttpsUrl(src)) {
+  if (!src || broken || !isImageUrl(src)) {
     return (
       <div className="flex h-full w-full items-center justify-center text-6xl" role="img" aria-label={alt}>
         {fallback}

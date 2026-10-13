@@ -4,6 +4,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { RecipeForm, recipeToForm, toRecipePayload } from "./RecipeForm"
 import type { RecipePayload } from "@/services/recipes.service"
 import { apiError, makeRecipe, renderWithClient } from "@/test/utils"
+import { uploadsService } from "@/services/uploads.service"
+
+vi.mock("@/services/uploads.service", () => ({ uploadsService: { upload: vi.fn() } }))
+// O navegador do teste (jsdom) não desenha em canvas: a foto vai como veio.
+vi.mock("@/lib/photo", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/photo")>()),
+  preparePhoto: vi.fn(async (file: File) => file),
+}))
 
 vi.mock("@/services/categories.service", () => ({
   categoriesService: { getAll: vi.fn().mockResolvedValue([{ id: 1, name: "Massas" }, { id: 2, name: "Doces" }]) },
@@ -64,7 +72,7 @@ describe("RecipeForm", () => {
     await user.type(cover, "http://exemplo.com/foto.jpg")
     await user.click(screen.getByRole("button", { name: "Salvar" }))
 
-    expect(await screen.findByText("Use um link que comece com https://")).toBeInTheDocument()
+    expect(await screen.findByText("Use um link que comece com https:// ou envie a foto do computador")).toBeInTheDocument()
     expect(onSubmit).not.toHaveBeenCalled()
   })
 
@@ -93,7 +101,7 @@ describe("RecipeForm", () => {
   it("campo de foto vazio pede o link ou que seja removido", async () => {
     const onSubmit = renderForm()
 
-    await user.click(screen.getByRole("button", { name: "Adicionar foto" }))
+    await user.click(screen.getByRole("button", { name: "Adicionar link" }))
     await user.click(screen.getByRole("button", { name: "Salvar" }))
 
     expect(await screen.findByText("Cole o link da foto ou remova o campo")).toBeInTheDocument()
@@ -145,5 +153,49 @@ describe("RecipeForm", () => {
     await user.click(screen.getByRole("button", { name: "Salvar" }))
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Sem permissão para editar esta receita")
+  })
+
+  it("envia várias fotos do computador de uma vez e elas entram depois das que já existiam", async () => {
+    const uuid = (n: number) => `00000000-0000-0000-0000-00000000000${n}`
+    vi.mocked(uploadsService.upload).mockResolvedValueOnce(`/api/uploads/${uuid(1)}`).mockResolvedValueOnce(`/api/uploads/${uuid(2)}`)
+    const onSubmit = renderForm()
+
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]')!
+    expect(input).toHaveAttribute("multiple")
+    await user.upload(input, [
+      new File(["a"], "a.png", { type: "image/png" }),
+      new File(["b"], "b.jpg", { type: "image/jpeg" }),
+    ])
+
+    expect(await screen.findByText("Foto 4: enviada do computador")).toBeInTheDocument()
+    expect(screen.getByText("Foto 3: enviada do computador")).toBeInTheDocument()
+
+    await user.click(screen.getAllByRole("button", { name: "Usar como capa" }).at(-1)!)
+    await user.click(screen.getByRole("button", { name: "Salvar" }))
+
+    await vi.waitFor(() => expect(onSubmit).toHaveBeenCalled())
+    expect(onSubmit.mock.calls[0][0].images).toEqual([
+      { url: `/api/uploads/${uuid(2)}` },
+      { url: "https://images.unsplash.com/capa.jpg" },
+      { url: "https://exemplo.com/extra.jpg" },
+      { url: `/api/uploads/${uuid(1)}` },
+    ])
+  })
+
+  it("mostra o erro do envio e mantém as fotos que já subiram", async () => {
+    vi.mocked(uploadsService.upload)
+      .mockReset()
+      .mockResolvedValueOnce("/api/uploads/00000000-0000-0000-0000-000000000001")
+      .mockRejectedValueOnce(apiError(422, { error: "use uma foto JPG, PNG, WebP ou GIF" }))
+    renderForm()
+
+    await user.upload(document.querySelector<HTMLInputElement>('input[type="file"]')!, [
+      new File(["a"], "a.png", { type: "image/png" }),
+      new File(["b"], "b.png", { type: "image/png" }),
+    ])
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Use uma foto JPG, PNG, WebP ou GIF")
+    expect(screen.getByText("Foto 3: enviada do computador")).toBeInTheDocument()
+    expect(screen.queryByText("Foto 4: enviada do computador")).not.toBeInTheDocument()
   })
 })

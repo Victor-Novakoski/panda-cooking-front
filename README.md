@@ -54,7 +54,7 @@ O navegador nunca vê o endereço da API: tudo passa pelo servidor do Next, que 
 | Página | Rota | Login |
 | --- | --- | --- |
 | Início, com as receitas mais novas | `/` | — |
-| Receitas: busca, categoria e paginação | `/dashboard` | — |
+| Receitas: busca, categoria e paginação | `/recipes` | — |
 | Receita: fotos, ingredientes, preparo, comentários | `/recipes/[id]` | para comentar e favoritar |
 | Nova receita, editar e apagar a sua | `/recipes/new`, `/recipes/[id]/edit` | ✅ |
 | Perfil: minhas receitas e favoritas | `/profile` | ✅ |

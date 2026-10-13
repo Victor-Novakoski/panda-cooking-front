@@ -13,7 +13,7 @@ import { Notice } from "@/components/ui/Notice"
 import { Pagination } from "@/components/ui/Pagination"
 import { Search, X } from "lucide-react"
 
-export default function DashboardPage() {
+export default function RecipesPage() {
   return (
     <>
       <Header />

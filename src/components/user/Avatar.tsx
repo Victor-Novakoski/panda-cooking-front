@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { cn, isHttpsUrl } from "@/lib/utils"
+import { cn, isImageUrl } from "@/lib/utils"
 
 const sizes = {
   sm: "h-7 w-7 border-2 text-sm",
@@ -21,7 +21,7 @@ interface AvatarProps {
 // qualquer site: vai direto num <img>, sem o otimizador do Next.
 export function Avatar({ src, alt = "", size = "md", className }: AvatarProps) {
   const [broken, setBroken] = useState(false)
-  const showPhoto = !!src && !broken && isHttpsUrl(src)
+  const showPhoto = !!src && !broken && isImageUrl(src)
 
   return (
     <div
