@@ -118,7 +118,7 @@ export default function ProfilePage() {
                       Criar a primeira receita
                     </Link>
                   ) : (
-                    <Link href="/dashboard" className="font-black text-[#C0392B] hover:underline">
+                    <Link href="/recipes" className="font-black text-[#C0392B] hover:underline">
                       Encontrar receitas para favoritar
                     </Link>
                   )}

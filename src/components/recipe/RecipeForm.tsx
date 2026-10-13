@@ -10,10 +10,11 @@ import type { RecipePayload } from "@/services/recipes.service"
 import { Input } from "@/components/ui/Input"
 import { Textarea } from "@/components/ui/Textarea"
 import { FormError } from "@/components/ui/FormError"
+import { PhotoUpload } from "@/components/ui/PhotoUpload"
 import { RecipeImage } from "./RecipeImage"
 import { showApiErrors } from "@/lib/forms"
 import { RECIPE, URL_MAX } from "@/lib/limits"
-import { isHttpsUrl } from "@/lib/utils"
+import { isImageUrl, isUploadPath } from "@/lib/utils"
 import type { Recipe } from "@/types"
 import { Plus, Trash2 } from "lucide-react"
 
@@ -48,7 +49,7 @@ export const recipeSchema = z.object({
           .trim()
           .min(1, "Cole o link da foto ou remova o campo")
           .max(URL_MAX, atMost(URL_MAX))
-          .refine(isHttpsUrl, "Use um link que comece com https://"),
+          .refine(isImageUrl, "Use um link que comece com https:// ou envie a foto do computador"),
       })
     )
     .max(RECIPE.imagesMax, `No máximo ${RECIPE.imagesMax} fotos`),
@@ -262,7 +263,7 @@ export function RecipeForm({
       <section className={sectionClass}>
         <SectionTitle number={2}>Fotos</SectionTitle>
         <p className="-mt-2 text-xs font-semibold text-[#1A0A00]/50">
-          Opcional. Cole o link (https) de até {RECIPE.imagesMax} fotos; a primeira é a capa.
+          Opcional. Até {RECIPE.imagesMax} fotos, do computador ou por link (https); a primeira é a capa.
         </p>
 
         {images.fields.map((field, index) => {
@@ -270,7 +271,7 @@ export function RecipeForm({
           return (
             <div key={field.id} className="flex items-start gap-2">
               <div className="relative mt-1 h-11 w-11 shrink-0 overflow-hidden rounded-lg border-2 border-[#1A0A00] bg-[#F5E6C8]">
-                {isHttpsUrl(url) ? (
+                {isImageUrl(url) ? (
                   <RecipeImage key={url} src={url} alt="" fallback="🖼️" fill sizes="44px" className="object-cover" />
                 ) : (
                   <div className="flex h-full items-center justify-center text-lg" aria-hidden>
@@ -278,13 +279,31 @@ export function RecipeForm({
                   </div>
                 )}
               </div>
-              <div className="flex-1">
-                <Input
-                  placeholder="https://..."
-                  aria-label={index === 0 ? "Link da foto de capa" : `Link da foto ${index + 1}`}
-                  error={errors.images?.[index]?.url?.message}
-                  {...register(`images.${index}.url`)}
-                />
+              <div className="flex flex-1 flex-col gap-1">
+                {isUploadPath(url) ? (
+                  <>
+                    <input type="hidden" {...register(`images.${index}.url`)} />
+                    <p className="flex h-11 items-center rounded-xl border-[3px] border-dashed border-[#1A0A00]/30 px-3 text-sm font-bold text-[#1A0A00]/60">
+                      {index === 0 ? "Capa: foto enviada do computador" : `Foto ${index + 1}: enviada do computador`}
+                    </p>
+                  </>
+                ) : (
+                  <Input
+                    placeholder="https://..."
+                    aria-label={index === 0 ? "Link da foto de capa" : `Link da foto ${index + 1}`}
+                    error={errors.images?.[index]?.url?.message}
+                    {...register(`images.${index}.url`)}
+                  />
+                )}
+                {index > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => images.move(index, 0)}
+                    className="self-start text-xs font-black text-[#C0392B] hover:underline"
+                  >
+                    Usar como capa
+                  </button>
+                )}
               </div>
               <button
                 type="button"
@@ -299,14 +318,21 @@ export function RecipeForm({
         })}
         <ListError message={errors.images?.root?.message ?? errors.images?.message} />
 
-        <button
-          type="button"
-          onClick={() => images.append({ url: "" })}
-          disabled={images.fields.length >= RECIPE.imagesMax}
-          className={addBtnClass}
-        >
-          <Plus className="h-4 w-4" /> Adicionar foto
-        </button>
+        <div className="flex flex-wrap items-start gap-3">
+          <PhotoUpload
+            label="Enviar do computador"
+            max={RECIPE.imagesMax - images.fields.length}
+            onUploaded={(urls) => images.append(urls.map((url) => ({ url })))}
+          />
+          <button
+            type="button"
+            onClick={() => images.append({ url: "" })}
+            disabled={images.fields.length >= RECIPE.imagesMax}
+            className={addBtnClass}
+          >
+            <Plus className="h-4 w-4" /> Adicionar link
+          </button>
+        </div>
       </section>
 
       {/* Ingredientes */}

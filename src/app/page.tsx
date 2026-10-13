@@ -1,10 +1,14 @@
 import Link from "next/link"
 import { Header } from "@/components/layout/Header"
 import { RecipeGrid } from "@/components/recipe/RecipeGrid"
+import { FortuneCookie } from "@/components/home/FortuneCookie"
+import { randomPhrase } from "@/components/home/phrases"
 import { getLatestRecipes } from "@/lib/server-api"
 
 export default async function Home() {
   const latest = await getLatestRecipes(4)
+  // sorteada aqui, no servidor, para o HTML e o navegador mostrarem a mesma frase
+  const phrase = randomPhrase()
 
   return (
     <>
@@ -41,7 +45,7 @@ export default async function Home() {
 
               <div className="flex flex-wrap gap-3">
                 <Link
-                  href="/dashboard"
+                  href="/recipes"
                   className="flex items-center gap-2 rounded-xl border-[3px] border-[#A07010] bg-[#D4A017] px-6 py-3 text-sm font-black text-[#1A0A00] shadow-[4px_4px_0px_#1A0A00] transition-all hover:bg-[#F0C040] active:translate-x-1 active:translate-y-1 active:shadow-none"
                 >
                   🔍 Explorar receitas
@@ -85,6 +89,18 @@ export default async function Home() {
           ))}
         </div>
 
+        {/* Biscoito da sorte */}
+        <section className="mx-auto w-full max-w-3xl px-6 pt-16">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="h-8 w-1.5 rounded-full border-2 border-[#1A0A00] bg-[#D4A017]" />
+            <h2 className="text-2xl font-black text-[#1A0A00] sm:text-3xl">Biscoito da sorte</h2>
+          </div>
+          <FortuneCookie initial={phrase} />
+          <p className="mt-3 text-center text-xs font-bold text-[#1A0A00]/40 sm:text-left">
+            Clique no biscoito para abrir outro.
+          </p>
+        </section>
+
         {/* Receitas mais novas */}
         {latest.length > 0 && (
           <section className="mx-auto w-full max-w-7xl px-6 py-16">
@@ -93,7 +109,7 @@ export default async function Home() {
                 <div className="h-8 w-1.5 rounded-full border-2 border-[#1A0A00] bg-[#C0392B]" />
                 <h2 className="text-2xl font-black text-[#1A0A00] sm:text-3xl">Saindo do forno</h2>
               </div>
-              <Link href="/dashboard" className="text-sm font-black text-[#C0392B] hover:underline">
+              <Link href="/recipes" className="text-sm font-black text-[#C0392B] hover:underline">
                 Ver todas →
               </Link>
             </div>

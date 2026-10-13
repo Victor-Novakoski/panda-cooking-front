@@ -17,6 +17,19 @@ export function isHttpsUrl(value: string) {
   }
 }
 
+// Foto enviada do computador: a API guarda e devolve este endereço, servido
+// pelo próprio site (o /api é repassado para a API).
+const UPLOAD_PATH = /^\/api\/uploads\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+export function isUploadPath(value: string) {
+  return UPLOAD_PATH.test(value)
+}
+
+// Endereço que pode virar foto: link https ou foto enviada do computador.
+export function isImageUrl(value: string) {
+  return isUploadPath(value) || isHttpsUrl(value)
+}
+
 // Tamanho em bytes (UTF-8): a senha tem limite em bytes por causa do bcrypt.
 export function utf8Length(value: string) {
   return new TextEncoder().encode(value).length
@@ -34,7 +47,7 @@ export function capitalize(text: string) {
 // como o navegador faria (que ignora tab e quebra de linha: "/\t/evil.com"
 // vira "//evil.com") e confere se continua na mesma origem.
 const BASE = "http://mesmo-site.invalid"
-export function safeNextPath(next: string | null | undefined, fallback = "/dashboard") {
+export function safeNextPath(next: string | null | undefined, fallback = "/recipes") {
   if (!next || !next.startsWith("/")) return fallback
   let url: URL
   try {

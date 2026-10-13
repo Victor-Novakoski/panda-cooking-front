@@ -15,7 +15,7 @@ export function Header() {
         style={{ background: "repeating-linear-gradient(90deg, #D4A017 0, #D4A017 12px, #A07010 12px, #A07010 24px)" }}
       />
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/recipes" className="flex items-center gap-3" aria-label="Panda Cooking, ir para as receitas">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl border-[3px] border-[#A07010] bg-[#D4A017] text-2xl shadow-[3px_3px_0px_#1A0A00]">
             🐼
           </div>
@@ -29,9 +29,9 @@ export function Header() {
 
         <nav className="flex items-center gap-1 sm:gap-2">
           <Link
-            href="/dashboard"
+            href="/recipes"
             className={`rounded-lg px-3 py-2 text-sm font-bold transition-colors sm:px-4 ${
-              isActive("/dashboard")
+              isActive("/recipes")
                 ? "bg-white/20 text-[#F0C040]"
                 : "text-[#F0C040]/80 hover:bg-white/10 hover:text-[#F0C040]"
             }`}

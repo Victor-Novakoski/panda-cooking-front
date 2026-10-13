@@ -9,7 +9,7 @@ import { loginAs, renderWithClient } from "@/test/utils"
 const push = vi.fn()
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
-  usePathname: () => "/dashboard",
+  usePathname: () => "/recipes",
 }))
 vi.mock("@/services/auth.service", () => ({ authService: { logout: vi.fn() } }))
 

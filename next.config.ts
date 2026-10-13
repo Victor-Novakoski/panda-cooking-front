@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
     // mostrada direto (ver src/components/recipe/RecipeImage.tsx).
     remotePatterns: [{ protocol: "https", hostname: "images.unsplash.com", pathname: "/**" }],
   },
+  // A lista de receitas era /dashboard: links antigos continuam funcionando.
+  async redirects() {
+    return [{ source: "/dashboard", destination: "/recipes", permanent: true }]
+  },
 }
 
 export default nextConfig

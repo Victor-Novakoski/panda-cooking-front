@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getRecipe } from "@/lib/server-api"
-import { formatDate, isHttpsUrl } from "@/lib/utils"
+import { formatDate, isImageUrl } from "@/lib/utils"
 import { Header } from "@/components/layout/Header"
 import { FavoriteButton } from "@/components/recipe/FavoriteButton"
 import { CommentSection } from "@/components/recipe/CommentSection"
@@ -39,7 +39,7 @@ export default async function RecipePage({ params }: PageProps) {
     <>
       <Header />
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6">
-        <Link href="/dashboard" className="mb-6 inline-flex items-center gap-1.5 text-sm font-black text-[#1A0A00]/50 hover:text-[#C0392B]">
+        <Link href="/recipes" className="mb-6 inline-flex items-center gap-1.5 text-sm font-black text-[#1A0A00]/50 hover:text-[#C0392B]">
           <ArrowLeft className="h-4 w-4" /> Todas as receitas
         </Link>
 
@@ -59,7 +59,7 @@ export default async function RecipePage({ params }: PageProps) {
           <div className="absolute bottom-0 left-0 right-0 p-6">
             <div className="mb-2 flex flex-wrap items-center gap-2">
               <Link
-                href={`/dashboard?categoria=${recipe.category.id}`}
+                href={`/recipes?categoria=${recipe.category.id}`}
                 className="rounded-full border-2 border-[#1A0A00] bg-[#D4A017] px-3 py-0.5 text-xs font-black text-[#1A0A00] shadow-[2px_2px_0px_#1A0A00] hover:bg-[#F0C040]"
               >
                 {recipe.category.name}
@@ -80,7 +80,7 @@ export default async function RecipePage({ params }: PageProps) {
 
             {gallery.length > 0 && (
               <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-                {gallery.filter((image) => isHttpsUrl(image.url)).map((image, index) => (
+                {gallery.filter((image) => isImageUrl(image.url)).map((image, index) => (
                   <a
                     key={image.id}
                     href={image.url}
