@@ -38,11 +38,6 @@ export default async function Home() {
                 com sabor de aventura
               </h1>
 
-              <p className="mb-6 text-base leading-relaxed text-white/70">
-                De dim sum a ramen. Explore pratos da comunidade, salve seus favoritos e
-                compartilhe suas criações com o mundo.
-              </p>
-
               {/* Biscoito da sorte, como no Panda Cooking original */}
               <div className="mb-8">
                 <FortuneCookie initial={phrase} />
