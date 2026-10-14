@@ -9,7 +9,7 @@ Situação revisada em 07/10/2026, na etapa 5 (sessão em cookie e revisão gera
 | Risco | Situação | Como está |
 | --- | --- | --- |
 | Roubo de sessão por XSS | ✅ | Access token só em memória (15 min); refresh token em cookie `HttpOnly` que o JavaScript não lê. Nada da sessão no `localStorage`. |
-| XSS | ✅ | React escapa texto; nenhum `dangerouslySetInnerHTML`. CSP com nonce por requisição e `'strict-dynamic'`: script injetado não roda. Links de foto só `https`. |
+| XSS | ✅ | React escapa texto; nenhum `dangerouslySetInnerHTML`. CSP com nonce por requisição e `'strict-dynamic'`: script injetado não roda. Links de foto só `https`. O vídeo da receita só aceita link do YouTube, e o player é montado com o id tirado do link, nunca com o endereço que a pessoa colou. |
 | CSRF | ✅ | Cookie de refresh `SameSite=Strict` e só em `/api/auth`. A rota `/api` recusa requisição que muda dados vinda de outra origem (403), e as rotas de dados exigem o `Authorization`, que outro site não consegue mandar. |
 | Clickjacking | ✅ | `frame-ancestors 'none'` e `X-Frame-Options: DENY`. |
 | Redirecionamento aberto | ✅ | O `?next=` do login é resolvido como o navegador faria e só vale se continuar no próprio site (`safeNextPath`); `//outro.site`, `https://...` e truques com tab ou quebra de linha (`/%09/outro.site`) voltam para o painel. |
@@ -27,11 +27,13 @@ Situação revisada em 07/10/2026, na etapa 5 (sessão em cookie e revisão gera
 
 ```
 default-src 'self'; script-src 'self' 'nonce-…' 'strict-dynamic'; style-src 'self' 'unsafe-inline';
-img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self'; object-src 'none';
+img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self';
+frame-src https://www.youtube-nocookie.com; object-src 'none';
 base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
 ```
 
 - `style-src 'unsafe-inline'`: o React e o `next/image` usam atributo `style`; CSS injetado não executa código.
 - `img-src https:`: as fotos vêm de links informados pelos usuários.
+- `frame-src https://www.youtube-nocookie.com`: o único site embutido é o player do vídeo da receita; qualquer outro `<iframe>` é bloqueado.
 - Em desenvolvimento entram `'unsafe-eval'` e `ws:` (usados pelo hot reload) e sai o `upgrade-insecure-requests`.
 - Testado em `src/proxy.test.ts`.

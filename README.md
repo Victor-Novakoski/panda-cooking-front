@@ -21,10 +21,12 @@ Este é o front, em Next.js. A API, em Go, está em [panda-cooking-go-api](https
 - Imprimir a receita (no papel saem só o nome, os ingredientes e o modo de preparo) e compartilhar o link.
 - Cozinhar no modo cozinha: um passo por vez em letra grande, com a tela do celular sem apagar.
 - Abrir a página de quem publicou e ver as outras receitas da pessoa.
-- Buscar sem se preocupar com acento ("pao" acha "Pão de Queijo Mineiro"), filtrar por categoria e navegar pelas páginas. Busca, categoria e página ficam na URL: dá para compartilhar o link, e voltar da receita traz a lista como estava.
+- Ajustar as porções: as quantidades dos ingredientes são recalculadas na receita, no modo cozinha e na impressão.
+- Assistir ao vídeo da receita, quando ela tem um.
+- Buscar sem se preocupar com acento ("pao" acha "Pão de Queijo Mineiro"), filtrar por categoria e por tempo de preparo, ordenar (mais novas, mais rápidas, mais favoritadas) e navegar pelas páginas. Busca, filtros, ordem e página ficam na URL: dá para compartilhar o link, e voltar da receita traz a lista como estava.
 
 **Com conta**
-- Publicar receita com até 10 fotos (por link), 50 ingredientes com quantidade e 50 passos de preparo, editar e apagar as suas.
+- Publicar receita com até 10 fotos (do computador ou por link), um vídeo do YouTube, 50 ingredientes com quantidade e 50 passos de preparo, editar e apagar as suas.
 - Comentar, editar e apagar o próprio comentário.
 - Favoritar e ver no perfil as próprias receitas e as favoritas, em duas abas.
 - Editar o perfil e apagar a conta.
@@ -40,7 +42,7 @@ Este é o front, em Next.js. A API, em Go, está em [panda-cooking-go-api](https
 - **Login e logout acompanhados entre abas** por `BroadcastChannel`, com o cache do usuário descartado na troca de conta.
 - **Páginas públicas renderizadas no servidor**, com título e prévia para link compartilhado, e 404 de verdade para receita que não existe.
 - **API fora do ar não desloga ninguém:** a sessão fica como indisponível e a página avisa, em vez de mandar para o login.
-- **209 testes** com Vitest e Testing Library, escritos pelo que o usuário vê. A CI roda lint sem warning, tipos, build, `npm audit` e gitleaks em todo PR.
+- **282 testes** com Vitest e Testing Library, escritos pelo que o usuário vê. A CI roda lint sem warning, tipos, build, `npm audit` e gitleaks em todo PR.
 
 ## Como funciona
 
@@ -135,7 +137,7 @@ npm run dev                  # http://localhost:3000
 ## Testes
 
 ```bash
-npm test                          # 209 testes (Vitest e Testing Library)
+npm test                          # 282 testes (Vitest e Testing Library)
 npm run lint && npm run typecheck
 npm run build
 ```
