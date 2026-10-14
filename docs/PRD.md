@@ -10,7 +10,8 @@ O PRD completo, com público e funcionalidades, fica na API: [panda-cooking-go-a
 | Entrar | `/auth/login` | — | ✅ |
 | Criar conta (entra direto depois) | `/auth/register` | — | ✅ |
 | Receitas: busca, filtro por categoria e paginação, tudo na URL | `/recipes` | — | ✅ |
-| Receita (fotos, ingredientes, preparo, comentários, favoritar) | `/recipes/[id]` | para comentar e favoritar | ✅ |
+| Receita (fotos, ingredientes, preparo, comentários, favoritar, compartilhar, imprimir e modo cozinha) | `/recipes/[id]` | para comentar e favoritar | ✅ |
+| Página pública do autor (nome, foto e receitas, paginadas) | `/users/[id]` | — | ✅ |
 | Nova receita | `/recipes/new` | ✅ | ✅ |
 | Perfil (minhas receitas e favoritas, paginadas) | `/profile` | ✅ | ✅ |
 | Editar e apagar receita (só quem criou) | `/recipes/[id]/edit` | ✅ | ✅ |

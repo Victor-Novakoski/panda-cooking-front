@@ -9,6 +9,8 @@ import { CommentSection } from "@/components/recipe/CommentSection"
 import { RecipeOwnerActions } from "@/components/recipe/RecipeOwnerActions"
 import { PhotoCarousel } from "@/components/recipe/PhotoCarousel"
 import { PrintButton } from "@/components/recipe/PrintButton"
+import { ShareButton } from "@/components/recipe/ShareButton"
+import { CookMode } from "@/components/recipe/CookMode"
 import { portionsLabel } from "@/components/recipe/format"
 import { Avatar } from "@/components/user/Avatar"
 import { ArrowLeft, ChefHat, Clock, Users } from "lucide-react"
@@ -66,41 +68,22 @@ export default async function RecipePage({ params }: PageProps) {
             ordem; o resto leva print:hidden. */}
         <p className="mb-6 hidden text-3xl font-black text-black print:block">{recipe.name}</p>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 print:flex print:flex-col-reverse">
-          <div className="flex flex-col gap-8 lg:col-span-2">
-            <p className="whitespace-pre-line text-base font-semibold leading-relaxed text-[#1A0A00]/70 print:hidden">
-              {recipe.description}
-            </p>
+        {/* A ordem aqui é a do celular e a do papel: ingredientes antes do
+            preparo. No computador a grade põe a coluna lateral à direita. */}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:grid-rows-[auto_auto_1fr] print:block">
+          <p className="whitespace-pre-line text-base font-semibold leading-relaxed text-[#1A0A00]/70 lg:col-span-2 lg:col-start-1 lg:row-start-1 print:hidden">
+            {recipe.description}
+          </p>
 
-            <section className="rounded-2xl border-[3px] border-[#1A0A00] bg-white p-6 shadow-[4px_4px_0px_#1A0A00] print:border-0 print:p-0 print:shadow-none">
-              <div className="mb-5 flex items-center gap-3">
-                <div className="h-6 w-1.5 rounded-full border-2 border-[#1A0A00] bg-[#C0392B]" />
-                <h2 className="text-xl font-black text-[#1A0A00]">Modo de preparo</h2>
-              </div>
-              <ol className="flex flex-col gap-4">
-                {recipe.preparations.map((step, index) => (
-                  <li key={step.id} className="flex gap-4 break-inside-avoid">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-[#1A0A00] bg-[#C0392B] text-sm font-black text-white shadow-[2px_2px_0px_#1A0A00]">
-                      {index + 1}
-                    </span>
-                    <p className="whitespace-pre-line pt-1 text-sm font-semibold leading-relaxed text-[#1A0A00]/70 print:text-black">
-                      {step.description}
-                    </p>
-                  </li>
-                ))}
-              </ol>
-            </section>
-
-            <div className="print:hidden">
-              <CommentSection recipeId={recipe.id} />
-            </div>
-          </div>
-
-          <aside className="flex flex-col gap-4">
+          <aside className="flex flex-col gap-4 lg:col-start-3 lg:row-span-3 lg:row-start-1 print:mb-8">
             <div className="contents print:hidden">
               <RecipeOwnerActions recipeId={recipe.id} ownerId={recipe.author.id} />
             </div>
-            <PrintButton />
+            <CookMode name={recipe.name} ingredients={recipe.ingredients} preparations={recipe.preparations} />
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-1 xl:grid-cols-2 print:hidden">
+              <ShareButton title={recipe.name} />
+              <PrintButton />
+            </div>
 
             <div className="rounded-2xl border-[3px] border-[#1A0A00] bg-white p-5 shadow-[4px_4px_0px_#1A0A00] print:hidden">
               <p className="mb-4 text-xs font-black uppercase tracking-widest text-[#1A0A00]/40">Informações</p>
@@ -118,18 +101,22 @@ export default async function RecipePage({ params }: PageProps) {
                   </div>
                 </div>
               ))}
-              <div className="flex items-center gap-3 pt-3">
+              <Link
+                href={`/users/${recipe.author.id}`}
+                title={`Ver as receitas de ${recipe.author.name}`}
+                className="group -mx-2 mt-1 flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-[#F5E6C8]"
+              >
                 <Avatar src={recipe.author.image_profile} />
                 <div className="min-w-0">
                   <p className="flex items-center gap-1 text-xs font-bold text-[#1A0A00]/40">
                     <ChefHat className="h-3 w-3" aria-hidden /> Chef
                   </p>
-                  <p className="truncate text-sm font-black text-[#1A0A00]">{recipe.author.name}</p>
+                  <p className="truncate text-sm font-black text-[#1A0A00] group-hover:text-[#C0392B]">{recipe.author.name}</p>
                   <p className="text-xs font-semibold text-[#1A0A00]/40">
                     publicada em <time dateTime={recipe.created_at}>{formatDate(recipe.created_at)}</time>
                   </p>
                 </div>
-              </div>
+              </Link>
             </div>
 
             <div className="rounded-2xl border-[3px] border-[#1A0A00] bg-white p-5 shadow-[4px_4px_0px_#1A0A00] print:border-0 print:p-0 print:shadow-none">
@@ -149,6 +136,29 @@ export default async function RecipePage({ params }: PageProps) {
               </ul>
             </div>
           </aside>
+
+          <section className="lg:col-span-2 lg:col-start-1 lg:row-start-2 rounded-2xl border-[3px] border-[#1A0A00] bg-white p-6 shadow-[4px_4px_0px_#1A0A00] print:border-0 print:p-0 print:shadow-none">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="h-6 w-1.5 rounded-full border-2 border-[#1A0A00] bg-[#C0392B]" />
+              <h2 className="text-xl font-black text-[#1A0A00]">Modo de preparo</h2>
+            </div>
+            <ol className="flex flex-col gap-4">
+              {recipe.preparations.map((step, index) => (
+                <li key={step.id} className="flex gap-4 break-inside-avoid">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-[#1A0A00] bg-[#C0392B] text-sm font-black text-white shadow-[2px_2px_0px_#1A0A00]">
+                    {index + 1}
+                  </span>
+                  <p className="whitespace-pre-line pt-1 text-sm font-semibold leading-relaxed text-[#1A0A00]/70 print:text-black">
+                    {step.description}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <div className="lg:col-span-2 lg:col-start-1 lg:row-start-3 print:hidden">
+            <CommentSection recipeId={recipe.id} />
+          </div>
         </div>
       </main>
     </>

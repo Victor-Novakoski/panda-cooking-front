@@ -10,7 +10,7 @@ describe("PrintButton", () => {
     const print = vi.spyOn(window, "print").mockImplementation(() => {})
     render(<PrintButton />)
 
-    await userEvent.click(screen.getByRole("button", { name: "Imprimir receita" }))
+    await userEvent.click(screen.getByRole("button", { name: "Imprimir" }))
 
     expect(print).toHaveBeenCalledOnce()
   })
