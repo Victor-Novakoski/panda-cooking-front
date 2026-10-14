@@ -35,7 +35,7 @@ export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
             <span className="flex items-center gap-1">
               <Users className="h-3 w-3" aria-hidden /> {portionsLabel(recipe.portions)}
             </span>
-            <span className="ml-auto truncate">por {recipe.author.name.split(" ")[0]}</span>
+            <span className="ml-auto min-w-0 max-w-full truncate">por {recipe.author.name}</span>
           </div>
         </div>
         <LinkPending />
