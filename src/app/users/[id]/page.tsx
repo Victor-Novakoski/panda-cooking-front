@@ -1,10 +1,11 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { getAuthorRecipes } from "@/lib/server-api"
+import { getAuthorRecipes, getPublicUser } from "@/lib/server-api"
 import { Header } from "@/components/layout/Header"
 import { AuthorRecipes } from "@/components/user/AuthorRecipes"
 import { Avatar } from "@/components/user/Avatar"
+import { Notice } from "@/components/ui/Notice"
 import { ArrowLeft } from "lucide-react"
 
 interface PageProps {
@@ -13,18 +14,17 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
-  const first = await getAuthorRecipes(id)
-  if (!first) return { title: "Página não encontrada" }
-  return { title: `Receitas de ${first.items[0].author.name}` }
+  const author = await getPublicUser(id)
+  if (!author) return { title: "Página não encontrada" }
+  return { title: `Receitas de ${author.name}` }
 }
 
 // Página pública de quem publica: nome, foto e as receitas.
 export default async function AuthorPage({ params }: PageProps) {
   const { id } = await params
-  const first = await getAuthorRecipes(id)
-  if (!first) notFound()
-
-  const author = first.items[0].author
+  const author = await getPublicUser(id)
+  if (!author) notFound()
+  const first = await getAuthorRecipes(author.id)
 
   return (
     <>
@@ -41,10 +41,27 @@ export default async function AuthorPage({ params }: PageProps) {
             <p className="text-sm font-bold text-[#1A0A00]/50">
               {first.total === 1 ? "1 receita publicada" : `${first.total} receitas publicadas`}
             </p>
+            <p className="mt-1 text-xs font-bold text-[#1A0A00]/40">
+              Na cozinha desde{" "}
+              {/* fuso fixo: a página é renderizada no servidor, que costuma estar em UTC */}
+              {new Date(author.created_at).toLocaleDateString("pt-BR", {
+                month: "long",
+                year: "numeric",
+                timeZone: "America/Sao_Paulo",
+              })}
+            </p>
           </div>
         </div>
 
-        <AuthorRecipes userId={id} first={first} />
+        {first.total === 0 ? (
+          <Notice emoji="🍳" title={`${author.name} ainda não publicou receitas.`}>
+            <Link href="/recipes" className="font-black text-[#C0392B] hover:underline">
+              Ver as receitas da comunidade
+            </Link>
+          </Notice>
+        ) : (
+          <AuthorRecipes userId={author.id} first={first} />
+        )}
       </main>
     </>
   )

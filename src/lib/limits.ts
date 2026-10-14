@@ -18,7 +18,9 @@ export const RECIPE = {
   nameMax: 120,
   descriptionMin: 10,
   descriptionMax: 2000,
-  timeMax: 50,
+  timeMinutesMin: 1,
+  // dois dias: massa que descansa, carne que marina de um dia para o outro
+  timeMinutesMax: 2880,
   portionsMin: 1,
   portionsMax: 100,
   imagesMax: 10,
@@ -28,6 +30,8 @@ export const RECIPE = {
   preparationsMax: 50,
   preparationMax: 1000,
 } as const
+
+export const VIDEO_URL_MAX = 200
 
 export const COMMENT_MAX = 1000
 

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import type { IngredientRecipe, Preparation } from "@/types"
 import { cn } from "@/lib/utils"
+import { useScaledIngredients } from "./Portions"
 import { ChefHat, ChevronLeft, ChevronRight, ListChecks, X } from "lucide-react"
 
 interface CookModeProps {
@@ -14,7 +15,9 @@ interface CookModeProps {
 // Modo cozinha: a receita em tela cheia, um passo por vez e em letra grande,
 // para ler de longe com a mão ocupada. Enquanto está aberto a tela do
 // aparelho não apaga (onde o navegador permite).
-export function CookMode({ name, ingredients, preparations }: CookModeProps) {
+export function CookMode({ name, ingredients: original, preparations }: CookModeProps) {
+  // as mesmas quantidades da página, já ajustadas para as porções escolhidas
+  const ingredients = useScaledIngredients(original)
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState(0)
   const [showIngredients, setShowIngredients] = useState(false)

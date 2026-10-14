@@ -45,6 +45,8 @@ function withSecurityHeaders(request: NextRequest) {
     "font-src 'self'",
     // o navegador só fala com o próprio front (/api); ws: é o recarregamento do next dev
     `connect-src 'self'${isDev ? " ws:" : ""}`,
+    // o único site embutido é o player do vídeo da receita
+    "frame-src https://www.youtube-nocookie.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

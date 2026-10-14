@@ -54,6 +54,45 @@ describe("RecipesPage", () => {
     expect(screen.getByRole("button", { name: "Pães e Bolos" })).toHaveAttribute("aria-pressed", "true")
   })
 
+  it("tempo e ordem vêm da URL e vão para a API", async () => {
+    searchParams = new URLSearchParams({ tempo: "30", ordem: "rapidas" })
+    vi.mocked(recipesService.list).mockResolvedValue(page([pao]))
+    renderWithClient(<RecipesPage />)
+
+    expect(await screen.findByText("1 receita em até 30 min")).toBeInTheDocument()
+    expect(recipesService.list).toHaveBeenCalledWith({
+      search: "",
+      category_id: undefined,
+      max_time: 30,
+      sort: "quickest",
+      page: 1,
+    })
+    expect(screen.getByRole("button", { name: "Até 30 min" })).toHaveAttribute("aria-pressed", "true")
+    expect(screen.getByLabelText("Ordenar")).toHaveValue("rapidas")
+  })
+
+  it("valor que a API não aceita na URL é ignorado", async () => {
+    searchParams = new URLSearchParams({ tempo: "7", ordem: "aleatoria" })
+    renderWithClient(<RecipesPage />)
+
+    await screen.findByText("2 receitas")
+    expect(recipesService.list).toHaveBeenCalledWith({ search: "", category_id: undefined, page: 1 })
+    expect(screen.getByLabelText("Ordenar")).toHaveValue("")
+  })
+
+  it("escolher tempo e ordem muda a URL e volta para a página 1", async () => {
+    searchParams = new URLSearchParams({ pagina: "3" })
+    window.history.replaceState(null, "", "/recipes?pagina=3")
+    renderWithClient(<RecipesPage />)
+    await screen.findByText("Bolo de Cenoura")
+
+    await userEvent.click(screen.getByRole("button", { name: "Até 1 hora" }))
+    expect(replace).toHaveBeenLastCalledWith("/recipes?tempo=60", { scroll: false })
+
+    await userEvent.selectOptions(screen.getByLabelText("Ordenar"), "Mais favoritadas")
+    expect(replace).toHaveBeenLastCalledWith("/recipes?ordem=favoritas", { scroll: false })
+  })
+
   it("digitar busca na API depois de uma pausa e volta para a página 1", async () => {
     searchParams = new URLSearchParams({ pagina: "3" })
     window.history.replaceState(null, "", "/recipes?pagina=3")
