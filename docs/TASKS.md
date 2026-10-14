@@ -72,17 +72,19 @@ Lista levantada navegando pelo site no computador e no celular (13/10/2026). O q
 
 **Design (só front)**
 
-- [ ] No celular, ingredientes antes do modo de preparo: hoje a ordem é descrição, preparo, comentários e só então informações e ingredientes
-- [ ] Página inicial para quem está logado: "Criar conta grátis" e o bloco "Pronto para cozinhar?" viram "Nova receita" / "Minhas receitas"
-- [ ] Topo da página inicial no celular: título menor, panda mascote visível e botão "Cadastrar" no cabeçalho
-- [ ] Nome do autor nos cartões: "Chef Maria Silva" aparece como "por Chef"; mostrar o nome inteiro, cortando com reticências
+- [x] No celular, ingredientes antes do modo de preparo (antes vinham depois dos comentários)
+- [x] Página inicial para quem está logado: os convites para criar conta viram "Publicar uma receita" e "Minhas receitas" (decidido no servidor, pelo cookie de sessão, sem piscar)
+- [x] Topo da página inicial no celular: título menor e panda mascote visível
+- [ ] Botão "Cadastrar" no cabeçalho do celular: não cabe ao lado de "Início", "Receitas" e "Entrar"; decidir o que sai (o topo da página inicial já tem "Criar conta grátis")
+- [x] Nome do autor inteiro nos cartões ("Chef Maria Silva" aparecia como "por Chef")
 - [ ] Capa da receita com foto em pé: decidir entre a foto inteira com faixas desfocadas (como está) e preencher a capa com corte
 
 **Funcionalidades só no front**
 
-- [ ] Modo cozinha: um passo por vez em letra grande, tela sem apagar (`navigator.wakeLock`) e ingredientes à mão
-- [ ] Compartilhar: botão que abre o compartilhamento do celular (`navigator.share`) ou copia o link
-- [ ] Perfil público do autor: clicar em "por João" abre a página dele com as receitas (a API já filtra por `user_id`; conferir se falta uma rota pública com nome e foto)
+- [x] Modo cozinha: um passo por vez em letra grande, tela sem apagar (`navigator.wakeLock`) e ingredientes à mão
+- [x] Compartilhar: botão que abre o compartilhamento do celular (`navigator.share`) ou copia o link
+- [x] Página pública do autor (`/users/[id]`), aberta pelo nome dele na página da receita. Nome e foto vêm das próprias receitas, porque a API ainda não tem rota de perfil público: quem não publicou nada não tem página
+- [ ] Link para a página do autor também nos cartões e nos comentários (o cartão inteiro já é um link para a receita)
 
 **Funcionalidades que dependem da API**
 
