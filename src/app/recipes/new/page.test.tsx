@@ -19,6 +19,7 @@ describe("NewRecipePage", () => {
   beforeEach(() => {
     push.mockReset()
     vi.mocked(recipesService.create).mockReset()
+    window.localStorage.clear()
   })
 
   it("publica a receita e abre a página dela", async () => {
@@ -38,6 +39,8 @@ describe("NewRecipePage", () => {
     await user.click(screen.getByRole("button", { name: /publicar receita/i }))
 
     await vi.waitFor(() => expect(push).toHaveBeenCalledWith("/recipes/nova"))
+    // publicou: o rascunho daquela conta não fica para trás
+    await vi.waitFor(() => expect(window.localStorage.getItem("panda:rascunho:nova-receita:maria")).toBeNull())
     expect(recipesService.create).toHaveBeenCalledWith({
       name: "Bolo de fubá",
       description: "O bolo da vó, fofinho e cheiroso.",

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useForm, useFieldArray, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -16,9 +16,10 @@ import { showApiErrors } from "@/lib/forms"
 import { RECIPE, URL_MAX, VIDEO_URL_MAX } from "@/lib/limits"
 import { isImageUrl, isUploadPath } from "@/lib/utils"
 import { youtubeId } from "@/lib/video"
+import { clearDraft, readDraft, saveDraft, type Draft } from "@/lib/draft"
 import { formatTime } from "./format"
 import type { Recipe } from "@/types"
-import { Plus, Trash2 } from "lucide-react"
+import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react"
 
 const atMost = (max: number) => `Use no máximo ${max} caracteres`
 
@@ -159,6 +160,8 @@ const addBtnClass =
 const removeBtnClass =
   "mt-1 rounded-lg border-2 border-[#1A0A00] p-2 text-[#1A0A00]/30 transition-colors hover:border-[#C0392B] hover:bg-[#C0392B]/10 hover:text-[#C0392B]"
 const listErrorClass = "text-xs font-bold text-[#C0392B]"
+const moveBtnClass =
+  "rounded-md border-2 border-transparent p-0.5 text-[#1A0A00]/40 transition-colors hover:border-[#1A0A00] hover:bg-[#F5E6C8] hover:text-[#1A0A00] disabled:pointer-events-none disabled:opacity-20"
 
 interface RecipeFormProps {
   defaultValues?: RecipeFormValues
@@ -168,6 +171,14 @@ interface RecipeFormProps {
   errorFallback: string
   submitLabel: string
   pendingLabel: string
+  // Onde guardar o rascunho neste navegador (só na criação). Sem a chave,
+  // o formulário não guarda nada.
+  draftKey?: string
+}
+
+// Formulário vazio: não vale guardar como rascunho.
+function isBlank(values: RecipeFormValues) {
+  return JSON.stringify(values) === JSON.stringify(emptyRecipeForm)
 }
 
 // Formulário de receita usado na criação e na edição.
@@ -177,7 +188,15 @@ export function RecipeForm({
   errorFallback,
   submitLabel,
   pendingLabel,
+  draftKey,
 }: RecipeFormProps) {
+  // O formulário só monta no navegador (as telas esperam a sessão), então
+  // dá para ler o rascunho já no primeiro render.
+  const [pendingDraft, setPendingDraft] = useState<Draft<RecipeFormValues> | null>(() => {
+    if (!draftKey) return null
+    const draft = readDraft<RecipeFormValues>(draftKey)
+    return draft && !isBlank(draft.values) ? draft : null
+  })
   const { data: categories } = useQuery({
     queryKey: ["categories"],
     queryFn: categoriesService.getAll,
@@ -191,6 +210,7 @@ export function RecipeForm({
     setValue,
     getValues,
     setError,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<RecipeFormValues>({
     resolver: zodResolver(recipeSchema),
@@ -201,6 +221,45 @@ export function RecipeForm({
   useEffect(() => {
     if (categories) setValue("category_id", getValues("category_id"))
   }, [categories, setValue, getValues])
+
+  // Guarda o rascunho meio segundo depois da última mudança. Enquanto a
+  // pessoa não decide o que fazer com um rascunho antigo, nada é gravado por
+  // cima dele.
+  const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  // depois de publicar, o rascunho some e não volta a ser gravado
+  const [published, setPublished] = useState(false)
+  const allValues = useWatch({ control })
+  // começa com os valores da montagem: abrir o formulário não grava nada
+  const lastSaved = useRef(JSON.stringify(allValues))
+  useEffect(() => {
+    if (!draftKey || pendingDraft) return
+    if (published) {
+      clearDraft(draftKey)
+      return
+    }
+    const serialized = JSON.stringify(allValues)
+    if (serialized === lastSaved.current) return
+    clearTimeout(saveTimer.current)
+    saveTimer.current = setTimeout(() => {
+      lastSaved.current = serialized
+      const current = allValues as RecipeFormValues
+      if (isBlank(current)) clearDraft(draftKey)
+      else saveDraft(draftKey, current)
+    }, 500)
+    return () => clearTimeout(saveTimer.current)
+  }, [allValues, draftKey, pendingDraft, published])
+
+  function restoreDraft() {
+    if (!pendingDraft) return
+    // campo que faltar no rascunho (versão antiga do formulário) fica vazio
+    reset({ ...emptyRecipeForm, ...pendingDraft.values })
+    setPendingDraft(null)
+  }
+
+  function discardDraft() {
+    if (draftKey) clearDraft(draftKey)
+    setPendingDraft(null)
+  }
 
   const images = useFieldArray({ control, name: "images" })
   const ingredients = useFieldArray({ control, name: "ingredients" })
@@ -213,6 +272,8 @@ export function RecipeForm({
   async function submit(data: RecipeFormValues) {
     try {
       await onSubmit(toRecipePayload(data))
+      if (draftKey) clearDraft(draftKey)
+      setPublished(true)
     } catch (error) {
       showApiErrors(error, setError, { fallback: errorFallback, fields: apiFields, lists: apiLists })
     }
@@ -220,6 +281,34 @@ export function RecipeForm({
 
   return (
     <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-6" noValidate>
+      {pendingDraft && (
+        <div
+          role="status"
+          className="flex flex-col gap-3 rounded-2xl border-[3px] border-dashed border-[#D4A017] bg-[#F5E6C8] p-5 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <p className="text-sm font-bold text-[#1A0A00]">
+            📝 Você tem uma receita não publicada
+            {pendingDraft.values.name ? ` (“${pendingDraft.values.name}”)` : ""}, guardada em{" "}
+            {new Date(pendingDraft.savedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}.
+          </p>
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              onClick={restoreDraft}
+              className="rounded-xl border-[3px] border-[#1A0A00] bg-[#D4A017] px-4 py-2 text-sm font-black text-[#1A0A00] shadow-[3px_3px_0px_#1A0A00] hover:bg-[#F0C040] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+            >
+              Continuar de onde parei
+            </button>
+            <button
+              type="button"
+              onClick={discardDraft}
+              className="rounded-xl border-[3px] border-[#1A0A00] bg-white px-4 py-2 text-sm font-black text-[#1A0A00] shadow-[3px_3px_0px_#1A0A00] hover:bg-[#FDF6E3] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+            >
+              Descartar
+            </button>
+          </div>
+        </div>
+      )}
       {/* Básico */}
       <section className={sectionClass}>
         <SectionTitle number={1}>Informações básicas</SectionTitle>
@@ -398,14 +487,22 @@ export function RecipeForm({
               />
             </div>
             {ingredients.fields.length > 1 && (
-              <button
-                type="button"
-                onClick={() => ingredients.remove(index)}
-                aria-label={`Remover ingrediente ${index + 1}`}
-                className={removeBtnClass}
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              <>
+                <MoveButtons
+                  label="ingrediente"
+                  index={index}
+                  count={ingredients.fields.length}
+                  onMove={(to) => ingredients.move(index, to)}
+                />
+                <button
+                  type="button"
+                  onClick={() => ingredients.remove(index)}
+                  aria-label={`Remover ingrediente ${index + 1}`}
+                  className={removeBtnClass}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </>
             )}
           </div>
         ))}
@@ -440,14 +537,22 @@ export function RecipeForm({
               />
             </div>
             {preparations.fields.length > 1 && (
-              <button
-                type="button"
-                onClick={() => preparations.remove(index)}
-                aria-label={`Remover passo ${index + 1}`}
-                className={removeBtnClass}
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              <>
+                <MoveButtons
+                  label="passo"
+                  index={index}
+                  count={preparations.fields.length}
+                  onMove={(to) => preparations.move(index, to)}
+                />
+                <button
+                  type="button"
+                  onClick={() => preparations.remove(index)}
+                  aria-label={`Remover passo ${index + 1}`}
+                  className={removeBtnClass}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </>
             )}
           </div>
         ))}
@@ -484,6 +589,32 @@ function SectionTitle({ number, children }: { number: number; children: React.Re
       </span>
       {children}
     </h2>
+  )
+}
+
+// Setas para trocar o item de lugar com o de cima ou o de baixo.
+function MoveButtons({ label, index, count, onMove }: { label: string; index: number; count: number; onMove: (to: number) => void }) {
+  return (
+    <div className="mt-0.5 flex flex-col">
+      <button
+        type="button"
+        onClick={() => onMove(index - 1)}
+        disabled={index === 0}
+        aria-label={`Subir ${label} ${index + 1}`}
+        className={moveBtnClass}
+      >
+        <ChevronUp className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        onClick={() => onMove(index + 1)}
+        disabled={index === count - 1}
+        aria-label={`Descer ${label} ${index + 1}`}
+        className={moveBtnClass}
+      >
+        <ChevronDown className="h-4 w-4" />
+      </button>
+    </div>
   )
 }
 

@@ -106,15 +106,15 @@ Segunda leva de sugestões (13/10/2026), ainda sem nada começado. O que depende
 
 **Para quem está cozinhando (só front)**
 
-- [ ] Marcar ingredientes e passos como feitos: tocar num item risca ele, na receita e no modo cozinha
-- [ ] Lista de compras: botão "Copiar ingredientes", com as quantidades já ajustadas para as porções escolhidas
+- [x] Marcar ingredientes e passos como feitos: tocar num item risca ele, na receita e no modo cozinha (avançar de passo no modo cozinha marca o passo). As marcas não são guardadas: recarregar a página começa de novo
+- [x] Lista de compras: botão "Copiar lista de compras", com as quantidades já ajustadas para as porções escolhidas; com algum ingrediente riscado, copia só os que faltam
 - [ ] Timer no modo cozinha: quando o passo cita um tempo ("cozinhe por 15 minutos"), botão "Iniciar 15 min" com aviso sonoro no fim
 - [ ] Receitas parecidas no fim da receita: "Mais de {autor}" e "Mais em {categoria}" (a API já filtra por autor e por categoria)
 
 **Para quem publica (só front)**
 
-- [ ] Rascunho automático: guardar o formulário de receita no navegador e oferecer "continuar de onde parou"; hoje fechar a aba no meio perde tudo
-- [ ] Reordenar passos e ingredientes no formulário, com setas para subir e descer
+- [x] Rascunho automático da receita nova, guardado no navegador (um por conta) meio segundo depois de cada mudança, com "Continuar de onde parei" ou "Descartar"; some ao publicar. A edição não guarda rascunho, para não brigar com a versão salva
+- [x] Reordenar passos e ingredientes no formulário, com setas para subir e descer
 
 **Dependem da API**
 

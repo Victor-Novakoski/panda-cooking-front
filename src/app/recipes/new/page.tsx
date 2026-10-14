@@ -5,12 +5,14 @@ import { useQueryClient } from "@tanstack/react-query"
 import { recipesService, type RecipePayload } from "@/services/recipes.service"
 import { RECIPES_KEY, recipeKey } from "@/hooks/useRecipes"
 import { useRequireAuth } from "@/hooks/useRequireAuth"
+import { useAuthStore } from "@/store/auth.store"
 import { Header } from "@/components/layout/Header"
 import { SessionNotice } from "@/components/layout/SessionNotice"
 import { RecipeForm } from "@/components/recipe/RecipeForm"
 
 export default function NewRecipePage() {
   const status = useRequireAuth()
+  const user = useAuthStore((s) => s.user)
   const router = useRouter()
   const queryClient = useQueryClient()
 
@@ -32,8 +34,10 @@ export default function NewRecipePage() {
           <p className="mt-1 text-sm font-semibold text-[#1A0A00]/50">Compartilhe sua criação com a comunidade</p>
         </div>
 
-        {status === "authenticated" ? (
+        {status === "authenticated" && user ? (
           <RecipeForm
+            // um rascunho por conta: no computador compartilhado, um não vê o do outro
+            draftKey={`panda:rascunho:nova-receita:${user.id}`}
             onSubmit={create}
             errorFallback="Não foi possível publicar a receita. Tente novamente."
             submitLabel="🥢 Publicar receita"

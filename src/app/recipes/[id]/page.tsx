@@ -11,7 +11,7 @@ import { PhotoCarousel } from "@/components/recipe/PhotoCarousel"
 import { PrintButton } from "@/components/recipe/PrintButton"
 import { ShareButton } from "@/components/recipe/ShareButton"
 import { CookMode } from "@/components/recipe/CookMode"
-import { IngredientList, PortionsProvider } from "@/components/recipe/Portions"
+import { CookingProvider, IngredientList, StepList } from "@/components/recipe/Cooking"
 import { RecipeVideo } from "@/components/recipe/RecipeVideo"
 import { formatTime, portionsLabel } from "@/components/recipe/format"
 import { Avatar } from "@/components/user/Avatar"
@@ -72,7 +72,7 @@ export default async function RecipePage({ params }: PageProps) {
 
         {/* A ordem aqui é a do celular e a do papel: ingredientes antes do
             preparo. No computador a grade põe a coluna lateral à direita. */}
-        <PortionsProvider base={recipe.portions}>
+        <CookingProvider base={recipe.portions}>
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:grid-rows-[auto_auto_auto_1fr] print:block">
             <p className="whitespace-pre-line text-base font-semibold leading-relaxed text-[#1A0A00]/70 lg:col-span-2 lg:col-start-1 lg:row-start-1 print:hidden">
               {recipe.description}
@@ -122,7 +122,7 @@ export default async function RecipePage({ params }: PageProps) {
                 </Link>
               </div>
 
-              <IngredientList ingredients={recipe.ingredients} />
+              <IngredientList ingredients={recipe.ingredients} recipeName={recipe.name} />
             </aside>
 
             <section className="lg:col-span-2 lg:col-start-1 lg:row-start-2 rounded-2xl border-[3px] border-[#1A0A00] bg-white p-6 shadow-[4px_4px_0px_#1A0A00] print:border-0 print:p-0 print:shadow-none">
@@ -130,18 +130,7 @@ export default async function RecipePage({ params }: PageProps) {
                 <div className="h-6 w-1.5 rounded-full border-2 border-[#1A0A00] bg-[#C0392B]" />
                 <h2 className="text-xl font-black text-[#1A0A00]">Modo de preparo</h2>
               </div>
-              <ol className="flex flex-col gap-4">
-                {recipe.preparations.map((step, index) => (
-                  <li key={step.id} className="flex gap-4 break-inside-avoid">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-[#1A0A00] bg-[#C0392B] text-sm font-black text-white shadow-[2px_2px_0px_#1A0A00]">
-                      {index + 1}
-                    </span>
-                    <p className="whitespace-pre-line pt-1 text-sm font-semibold leading-relaxed text-[#1A0A00]/70 print:text-black">
-                      {step.description}
-                    </p>
-                  </li>
-                ))}
-              </ol>
+              <StepList steps={recipe.preparations} />
             </section>
 
             <div className="empty:hidden lg:col-span-2 lg:col-start-1 lg:row-start-3">
@@ -152,7 +141,7 @@ export default async function RecipePage({ params }: PageProps) {
               <CommentSection recipeId={recipe.id} />
             </div>
           </div>
-        </PortionsProvider>
+        </CookingProvider>
       </main>
     </>
   )

@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react"
 import type { IngredientRecipe, Preparation } from "@/types"
 import { cn } from "@/lib/utils"
-import { useScaledIngredients } from "./Portions"
-import { ChefHat, ChevronLeft, ChevronRight, ListChecks, X } from "lucide-react"
+import { CheckItem, ingredientKey, stepKey, useCooking, useScaledIngredients } from "./Cooking"
+import { Check, ChefHat, ChevronLeft, ChevronRight, ListChecks, X } from "lucide-react"
 
 interface CookModeProps {
   name: string
@@ -18,6 +18,8 @@ interface CookModeProps {
 export function CookMode({ name, ingredients: original, preparations }: CookModeProps) {
   // as mesmas quantidades da página, já ajustadas para as porções escolhidas
   const ingredients = useScaledIngredients(original)
+  // o que já foi riscado na página continua riscado aqui, e vice-versa
+  const cooking = useCooking()
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState(0)
   const [showIngredients, setShowIngredients] = useState(false)
@@ -35,6 +37,17 @@ export function CookMode({ name, ingredients: original, preparations }: CookMode
   function close() {
     setOpen(false)
     opener.current?.focus()
+  }
+
+  // Passar para o próximo passo marca o atual como feito; voltar não desmarca.
+  function next() {
+    cooking?.setDone(stepKey(preparations[step]), true)
+    setStep((s) => Math.min(last, s + 1))
+  }
+
+  function finish() {
+    cooking?.setDone(stepKey(preparations[last]), true)
+    close()
   }
 
   // Tela acesa. O navegador solta a trava quando a aba sai da frente; ao
@@ -80,7 +93,7 @@ export function CookMode({ name, ingredients: original, preparations }: CookMode
   function onKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Escape") close()
     if (e.key === "ArrowLeft") setStep((s) => Math.max(0, s - 1))
-    if (e.key === "ArrowRight") setStep((s) => Math.min(last, s + 1))
+    if (e.key === "ArrowRight" && !showIngredients && step < last) next()
     // o Tab fica dando a volta dentro da janela
     if (e.key === "Tab" && dialog.current) {
       const focusable = dialog.current.querySelectorAll<HTMLElement>("button:not(:disabled)")
@@ -151,19 +164,44 @@ export function CookMode({ name, ingredients: original, preparations }: CookMode
               <div className="mx-auto max-w-2xl">
                 <h2 className="mb-5 text-2xl font-black text-[#1A0A00] sm:text-3xl">Ingredientes</h2>
                 <ul className="flex flex-col gap-3">
-                  {ingredients.map((item) => (
-                    <li key={item.id} className="border-b-2 border-dashed border-[#D4A017]/50 pb-3 text-lg sm:text-xl">
-                      <span className="font-black text-[#1A0A00]">{item.amount}</span>
-                      <span className="font-semibold text-[#1A0A00]/70"> {item.name}</span>
-                    </li>
-                  ))}
+                  {ingredients.map((item) => {
+                    const text = (
+                      <>
+                        <span className="font-black text-[#1A0A00]">{item.amount}</span>
+                        <span className="font-semibold text-[#1A0A00]/70"> {item.name}</span>
+                      </>
+                    )
+                    return (
+                      <li key={item.id} className="border-b-2 border-dashed border-[#D4A017]/50 pb-3 text-lg sm:text-xl">
+                        {cooking ? (
+                          <CheckItem
+                            checked={cooking.done.has(ingredientKey(item))}
+                            onToggle={() => cooking.toggle(ingredientKey(item))}
+                            label={`${item.amount} ${item.name}`}
+                            className="[&>span:first-of-type]:mt-1.5 [&>span:first-of-type]:h-5 [&>span:first-of-type]:w-5"
+                          >
+                            {text}
+                          </CheckItem>
+                        ) : (
+                          text
+                        )}
+                      </li>
+                    )
+                  })}
                 </ul>
               </div>
             ) : (
               <div className="mx-auto flex min-h-full max-w-3xl flex-col justify-center gap-6">
-                <span className="flex h-14 w-14 items-center justify-center rounded-full border-[3px] border-[#1A0A00] bg-[#C0392B] text-2xl font-black text-white shadow-[3px_3px_0px_#1A0A00]">
-                  {step + 1}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-full border-[3px] border-[#1A0A00] bg-[#C0392B] text-2xl font-black text-white shadow-[3px_3px_0px_#1A0A00]">
+                    {step + 1}
+                  </span>
+                  {cooking?.done.has(stepKey(preparations[step])) && (
+                    <span className="flex items-center gap-1 rounded-full border-2 border-[#1A0A00] bg-[#27AE60] px-3 py-1 text-sm font-black text-white">
+                      <Check className="h-4 w-4" strokeWidth={4} aria-hidden /> Feito
+                    </span>
+                  )}
+                </div>
                 <p className="whitespace-pre-line text-2xl font-bold leading-snug text-[#1A0A00] sm:text-4xl sm:leading-snug">
                   {preparations[step].description}
                 </p>
@@ -191,13 +229,13 @@ export function CookMode({ name, ingredients: original, preparations }: CookMode
               <ListChecks className="h-5 w-5 shrink-0" aria-hidden /> {showIngredients ? "Voltar ao passo" : "Ingredientes"}
             </button>
             {step === last && !showIngredients ? (
-              <button type="button" onClick={close} className={cn(barButton, "bg-[#D4A017] hover:bg-[#F0C040]")}>
+              <button type="button" onClick={finish} className={cn(barButton, "bg-[#D4A017] hover:bg-[#F0C040]")}>
                 Pronto! 🐼
               </button>
             ) : (
               <button
                 type="button"
-                onClick={() => setStep((s) => Math.min(last, s + 1))}
+                onClick={next}
                 disabled={showIngredients}
                 aria-label="Próximo"
                 className={cn(barButton, "bg-[#D4A017] hover:bg-[#F0C040]")}
