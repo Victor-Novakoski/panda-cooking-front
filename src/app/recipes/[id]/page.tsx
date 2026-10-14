@@ -7,7 +7,6 @@ import { Header } from "@/components/layout/Header"
 import { FavoriteButton } from "@/components/recipe/FavoriteButton"
 import { CommentSection } from "@/components/recipe/CommentSection"
 import { RecipeOwnerActions } from "@/components/recipe/RecipeOwnerActions"
-import { RecipeImage } from "@/components/recipe/RecipeImage"
 import { PhotoCarousel } from "@/components/recipe/PhotoCarousel"
 import { portionsLabel } from "@/components/recipe/format"
 import { Avatar } from "@/components/user/Avatar"
@@ -34,8 +33,7 @@ export default async function RecipePage({ params }: PageProps) {
   const recipe = await getRecipe(id)
   if (!recipe) notFound()
 
-  const [cover, ...gallery] = recipe.images
-  const photos = gallery.filter((image) => isImageUrl(image.url))
+  const photos = recipe.images.filter((image) => isImageUrl(image.url))
 
   return (
     <>
@@ -45,21 +43,10 @@ export default async function RecipePage({ params }: PageProps) {
           <ArrowLeft className="h-4 w-4" /> Todas as receitas
         </Link>
 
-        {/* Capa */}
-        <div className="relative mb-10 h-64 overflow-hidden rounded-3xl border-4 border-[#1A0A00] bg-[#F5E6C8] shadow-[6px_6px_0px_#1A0A00] sm:h-80 md:h-96">
-          <RecipeImage
-            src={cover?.url ?? ""}
-            alt={recipe.name}
-            fill
-            priority
-            sizes="(min-width: 1024px) 1024px, 100vw"
-            className="object-cover"
-            fallback="🍽️"
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
-
-          <div className="absolute bottom-0 left-0 right-0 p-6">
-            <div className="mb-2 flex flex-wrap items-center gap-2">
+        {/* Capa: todas as fotos da receita num carrossel */}
+        <div className="mb-10">
+          <PhotoCarousel images={photos} name={recipe.name}>
+            <div className="mb-2 flex w-fit flex-wrap items-center gap-2">
               <Link
                 href={`/recipes?categoria=${recipe.category.id}`}
                 className="rounded-full border-2 border-[#1A0A00] bg-[#D4A017] px-3 py-0.5 text-xs font-black text-[#1A0A00] shadow-[2px_2px_0px_#1A0A00] hover:bg-[#F0C040]"
@@ -68,10 +55,10 @@ export default async function RecipePage({ params }: PageProps) {
               </Link>
               <FavoriteButton recipeId={recipe.id} />
             </div>
-            <h1 className="text-3xl font-black text-white drop-shadow-lg sm:text-4xl" style={{ textShadow: "2px 2px 0 #000" }}>
+            <h1 className="w-fit text-3xl font-black text-white drop-shadow-lg sm:text-4xl" style={{ textShadow: "2px 2px 0 #000" }}>
               {recipe.name}
             </h1>
-          </div>
+          </PhotoCarousel>
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -79,8 +66,6 @@ export default async function RecipePage({ params }: PageProps) {
             <p className="whitespace-pre-line text-base font-semibold leading-relaxed text-[#1A0A00]/70">
               {recipe.description}
             </p>
-
-            {photos.length > 0 && <PhotoCarousel images={photos} name={recipe.name} />}
 
             <section className="rounded-2xl border-[3px] border-[#1A0A00] bg-white p-6 shadow-[4px_4px_0px_#1A0A00]">
               <div className="mb-5 flex items-center gap-3">
