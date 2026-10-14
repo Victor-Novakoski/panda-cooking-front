@@ -5,13 +5,15 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import { useRecipeList } from "@/hooks/useRecipes"
 import { categoriesService } from "@/services/categories.service"
+import type { RecipeSort } from "@/services/recipes.service"
 import { PAGE_MAX, SEARCH_MAX } from "@/lib/limits"
 import { cn } from "@/lib/utils"
 import { Header } from "@/components/layout/Header"
 import { RecipeGrid, RecipeGridSkeleton } from "@/components/recipe/RecipeGrid"
+import { formatTime } from "@/components/recipe/format"
 import { Notice } from "@/components/ui/Notice"
 import { Pagination } from "@/components/ui/Pagination"
-import { Search, X } from "lucide-react"
+import { Clock, Search, X } from "lucide-react"
 
 export default function RecipesPage() {
   return (
@@ -26,11 +28,29 @@ export default function RecipesPage() {
   )
 }
 
+const smallChipClass =
+  "flex shrink-0 items-center gap-1.5 rounded-full border-2 border-[#1A0A00] px-3 py-1 text-xs font-black shadow-[2px_2px_0px_#1A0A00] transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+
 const chipClass =
   "shrink-0 rounded-full border-[3px] border-[#1A0A00] px-4 py-1.5 text-sm font-black shadow-[2px_2px_0px_#1A0A00] transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
 
-// Busca, categoria e página ficam na URL (?q=&categoria=&pagina=): dá para
-// compartilhar o link, e voltar da receita traz a lista como estava.
+// Ordem da lista: o valor de ?ordem= e o sort que a API entende.
+const SORTS: { param: string; sort: RecipeSort; label: string }[] = [
+  { param: "", sort: "recent", label: "Mais novas" },
+  { param: "rapidas", sort: "quickest", label: "Mais rápidas" },
+  { param: "favoritas", sort: "favorites", label: "Mais favoritadas" },
+]
+
+// Filtro por tempo de preparo (?tempo=, em minutos).
+const TIMES = [
+  { minutes: 15, label: "Até 15 min" },
+  { minutes: 30, label: "Até 30 min" },
+  { minutes: 60, label: "Até 1 hora" },
+]
+
+// Busca, categoria, tempo, ordem e página ficam na URL
+// (?q=&categoria=&tempo=&ordem=&pagina=): dá para compartilhar o link, e
+// voltar da receita traz a lista como estava.
 function RecipeBrowser() {
   const router = useRouter()
   const pathname = usePathname()
@@ -42,13 +62,22 @@ function RecipeBrowser() {
   const rawCategory = Number(searchParams.get("categoria"))
   const categoryId = Number.isInteger(rawCategory) && rawCategory > 0 ? rawCategory : undefined
   const page = Math.min(PAGE_MAX, Math.max(1, Math.trunc(Number(searchParams.get("pagina"))) || 1))
+  const maxTime = TIMES.find((t) => String(t.minutes) === searchParams.get("tempo"))?.minutes
+  const order = SORTS.find((s) => s.param === (searchParams.get("ordem") ?? "")) ?? SORTS[0]
 
   const { data: categories } = useQuery({
     queryKey: ["categories"],
     queryFn: categoriesService.getAll,
     staleTime: Infinity,
   })
-  const { data, isPending, isError, isPlaceholderData } = useRecipeList({ search: q, category_id: categoryId, page })
+  const { data, isPending, isError, isPlaceholderData } = useRecipeList({
+    search: q,
+    category_id: categoryId,
+    max_time: maxTime,
+    // a ordem padrão não vai na requisição
+    sort: order.sort === "recent" ? undefined : order.sort,
+    page,
+  })
 
   // O campo de busca é atualizado na hora; a URL (e a busca na API) só
   // depois de 300 ms sem digitar.
@@ -102,7 +131,7 @@ function RecipeBrowser() {
   }
 
   const category = categories?.find((c) => c.id === categoryId)
-  const hasFilters = !!q || !!categoryId
+  const hasFilters = !!q || !!categoryId || !!maxTime
 
   return (
     <>
@@ -112,7 +141,7 @@ function RecipeBrowser() {
           <div>
             <h1 className="text-3xl font-black text-[#1A0A00]">Receitas</h1>
             <p className="text-sm font-semibold text-[#1A0A00]/50" aria-live="polite">
-              {data ? resultsLabel(data.total, q, category?.name) : "Explore o que a comunidade criou"}
+              {data ? resultsLabel(data.total, q, category?.name, maxTime) : "Explore o que a comunidade criou"}
             </p>
           </div>
         </div>
@@ -132,7 +161,7 @@ function RecipeBrowser() {
       </div>
 
       {/* Categorias */}
-      <div className="-mx-4 mb-8 flex gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0" role="group" aria-label="Filtrar por categoria">
+      <div className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0" role="group" aria-label="Filtrar por categoria">
         <button
           type="button"
           aria-pressed={!categoryId}
@@ -155,6 +184,41 @@ function RecipeBrowser() {
             {c.name}
           </button>
         ))}
+      </div>
+
+      {/* Tempo de preparo e ordem */}
+      <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0" role="group" aria-label="Filtrar por tempo de preparo">
+          {TIMES.map((t) => (
+            <button
+              key={t.minutes}
+              type="button"
+              aria-pressed={t.minutes === maxTime}
+              onClick={() => updateParams({ tempo: t.minutes === maxTime ? undefined : String(t.minutes), pagina: undefined })}
+              className={cn(
+                smallChipClass,
+                t.minutes === maxTime ? "bg-[#D4A017] text-[#1A0A00]" : "bg-white text-[#1A0A00]/70 hover:bg-[#F5E6C8]"
+              )}
+            >
+              <Clock className="h-3.5 w-3.5" aria-hidden /> {t.label}
+            </button>
+          ))}
+        </div>
+
+        <label className="flex shrink-0 items-center gap-2 text-xs font-black uppercase tracking-widest text-[#1A0A00]/50">
+          Ordenar
+          <select
+            value={order.param}
+            onChange={(e) => updateParams({ ordem: e.target.value || undefined, pagina: undefined })}
+            className="h-9 rounded-xl border-[3px] border-[#1A0A00] bg-white px-2 text-sm font-black normal-case tracking-normal text-[#1A0A00] shadow-[2px_2px_0px_#1A0A00] focus:border-[#C0392B] focus:outline-none"
+          >
+            {SORTS.map((s) => (
+              <option key={s.sort} value={s.param}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       {isPending && <RecipeGridSkeleton />}
@@ -204,10 +268,11 @@ function RecipeBrowser() {
   )
 }
 
-function resultsLabel(total: number, q: string, category?: string) {
+function resultsLabel(total: number, q: string, category?: string, maxTime?: number) {
   const count = total === 1 ? "1 receita" : `${total} receitas`
   const parts = [count]
   if (q) parts.push(`para “${q}”`)
   if (category) parts.push(`em ${category}`)
+  if (maxTime) parts.push(`em até ${formatTime(maxTime)}`)
   return parts.join(" ")
 }

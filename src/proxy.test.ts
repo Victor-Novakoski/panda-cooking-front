@@ -58,6 +58,8 @@ describe("proxy", () => {
       expect(csp).toContain(`script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`)
       expect(csp).toContain("frame-ancestors 'none'")
       expect(csp).toContain("object-src 'none'")
+      // o único site que pode aparecer embutido é o player do vídeo da receita
+      expect(csp).toContain("frame-src https://www.youtube-nocookie.com;")
       expect(csp).not.toContain("unsafe-eval")
       expect(res.headers.get("x-middleware-request-content-security-policy")).toBe(csp)
     })

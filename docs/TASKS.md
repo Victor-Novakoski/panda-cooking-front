@@ -83,17 +83,17 @@ Lista levantada navegando pelo site no computador e no celular (13/10/2026). O q
 
 - [x] Modo cozinha: um passo por vez em letra grande, tela sem apagar (`navigator.wakeLock`) e ingredientes à mão
 - [x] Compartilhar: botão que abre o compartilhamento do celular (`navigator.share`) ou copia o link
-- [x] Página pública do autor (`/users/[id]`), aberta pelo nome dele na página da receita. Nome e foto vêm das próprias receitas, porque a API ainda não tem rota de perfil público: quem não publicou nada não tem página
+- [x] Página pública do autor (`/users/[id]`), aberta pelo nome dele na página da receita, com nome, foto, desde quando está no site e as receitas (`GET /api/users/{id}`; quem ainda não publicou nada também tem página)
 - [ ] Link para a página do autor também nos cartões e nos comentários (o cartão inteiro já é um link para a receita)
 
 **Funcionalidades que dependem da API**
 
-- [ ] Tempo em minutos: o site formata sempre igual ("40 min", "1h 30min") e o formulário pede número; hoje é texto livre e aparece "40", "20 minutos", "3 horas"
-- [ ] Ajustar porções: "− 4 porções +" na receita recalculando as quantidades dos ingredientes
-- [ ] Ordenar a lista (mais novas, mais favoritadas, mais rápidas) e filtrar por tempo
-- [ ] Avaliação com estrelas (1 a 5) na receita e a média nos cartões
-- [ ] Vídeo da receita por link do YouTube, numa seção própria abaixo da descrição
-- [ ] Categorias pelo admin: botão "Nova categoria" na página de receitas, só para admin
+- [x] Tempo em minutos: o site formata sempre igual ("40 min", "1h 30min") e o formulário pede o número de minutos
+- [x] Ajustar porções: "− 4 porções +" na receita recalculando as quantidades, também no modo cozinha e na impressão. Não precisou da API: o front lê o número do começo da quantidade ("500g", "3 colheres de sopa", "1/2 xícara") e acerta o plural da medida; o que não começa com número ("a gosto") fica como está
+- [x] Ordenar a lista (mais novas, mais rápidas, mais favoritadas) e filtrar por tempo (até 15 min, 30 min ou 1 hora), os dois na URL (`?ordem=`, `?tempo=`)
+- [x] ~~Avaliação com estrelas~~: decidido não fazer. Numa comunidade, nota baixa influencia quem vê a receita e desanima quem publicou; ficam os favoritos e os comentários
+- [x] Vídeo da receita por link do YouTube, numa seção própria depois do modo de preparo (player do `youtube-nocookie.com`, liberado no `frame-src` da CSP)
+- [x] ~~Categorias pelo admin~~: decidido não fazer; as categorias continuam fixas
 - [ ] Recuperar senha: telas de "esqueci a senha" e de nova senha
 
 **Ambiente local**

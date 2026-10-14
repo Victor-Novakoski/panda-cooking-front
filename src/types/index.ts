@@ -10,6 +10,14 @@ export interface User {
   created_at?: string
 }
 
+// Página pública de uma pessoa: o que qualquer visitante vê.
+export interface PublicUser {
+  id: string
+  name: string
+  image_profile: string
+  created_at: string
+}
+
 // O que é público de quem escreveu a receita ou o comentário.
 export interface Author {
   id: string
@@ -43,7 +51,8 @@ export interface RecipeSummary {
   id: string
   name: string
   description: string
-  time: string
+  // tempo de preparo, em minutos
+  time_minutes: number
   portions: number
   // vazio quando a receita não tem foto
   image_url: string
@@ -56,8 +65,10 @@ export interface Recipe {
   id: string
   name: string
   description: string
-  time: string
+  time_minutes: number
   portions: number
+  // link do YouTube (https://www.youtube.com/watch?v=...); vazio quando não tem
+  video_url: string
   category: Category
   author: Author
   images: ImageRecipe[]

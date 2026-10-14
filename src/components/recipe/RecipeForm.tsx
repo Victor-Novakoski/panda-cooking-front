@@ -13,8 +13,10 @@ import { FormError } from "@/components/ui/FormError"
 import { PhotoUpload } from "@/components/ui/PhotoUpload"
 import { RecipeImage } from "./RecipeImage"
 import { showApiErrors } from "@/lib/forms"
-import { RECIPE, URL_MAX } from "@/lib/limits"
+import { RECIPE, URL_MAX, VIDEO_URL_MAX } from "@/lib/limits"
 import { isImageUrl, isUploadPath } from "@/lib/utils"
+import { youtubeId } from "@/lib/video"
+import { formatTime } from "./format"
 import type { Recipe } from "@/types"
 import { Plus, Trash2 } from "lucide-react"
 
@@ -31,7 +33,15 @@ export const recipeSchema = z.object({
     .trim()
     .min(RECIPE.descriptionMin, `Descreva melhor a receita (pelo menos ${RECIPE.descriptionMin} caracteres)`)
     .max(RECIPE.descriptionMax, atMost(RECIPE.descriptionMax)),
-  time: z.string().trim().min(1, "Informe o tempo").max(RECIPE.timeMax, atMost(RECIPE.timeMax)),
+  // em minutos; texto no formulário, como as porções, para o campo poder ficar vazio
+  time_minutes: z
+    .string()
+    .trim()
+    .min(1, "Informe o tempo")
+    .refine(
+      (v) => /^\d+$/.test(v) && Number(v) >= RECIPE.timeMinutesMin && Number(v) <= RECIPE.timeMinutesMax,
+      `Use um número de ${RECIPE.timeMinutesMin} a ${RECIPE.timeMinutesMax} minutos`
+    ),
   portions: z
     .string()
     .trim()
@@ -41,6 +51,11 @@ export const recipeSchema = z.object({
       `Use um número de ${RECIPE.portionsMin} a ${RECIPE.portionsMax}`
     ),
   category_id: z.string().min(1, "Selecione uma categoria"),
+  video_url: z
+    .string()
+    .trim()
+    .max(VIDEO_URL_MAX, atMost(VIDEO_URL_MAX))
+    .refine((v) => v === "" || youtubeId(v) !== null, "Use um link de vídeo do YouTube"),
   images: z
     .array(
       z.object({
@@ -93,9 +108,10 @@ const apiLists = ["images", "ingredients", "preparations"]
 export const emptyRecipeForm: RecipeFormValues = {
   name: "",
   description: "",
-  time: "",
+  time_minutes: "",
   portions: "",
   category_id: "",
+  video_url: "",
   images: [],
   ingredients: [{ amount: "", name: "" }],
   preparations: [{ description: "" }],
@@ -106,9 +122,10 @@ export function recipeToForm(recipe: Recipe): RecipeFormValues {
   return {
     name: recipe.name,
     description: recipe.description,
-    time: recipe.time,
+    time_minutes: String(recipe.time_minutes),
     portions: String(recipe.portions),
     category_id: String(recipe.category.id),
+    video_url: recipe.video_url,
     images: recipe.images.map(({ url }) => ({ url })),
     ingredients: recipe.ingredients.length
       ? recipe.ingredients.map(({ amount, name }) => ({ amount, name }))
@@ -125,9 +142,10 @@ export function toRecipePayload(data: RecipeFormValues): RecipePayload {
   return {
     name: data.name,
     description: data.description,
-    time: data.time,
+    time_minutes: Number(data.time_minutes),
     portions: Number(data.portions),
     category_id: Number(data.category_id),
+    video_url: data.video_url,
     images: data.images,
     ingredients: data.ingredients,
     preparations: data.preparations,
@@ -190,6 +208,7 @@ export function RecipeForm({
 
   const imageUrls = useWatch({ control, name: "images" })
   const description = useWatch({ control, name: "description" })
+  const minutes = Number(useWatch({ control, name: "time_minutes" }))
 
   async function submit(data: RecipeFormValues) {
     try {
@@ -224,7 +243,19 @@ export function RecipeForm({
         />
 
         <div className="grid grid-cols-2 gap-4">
-          <Input id="time" label="Tempo" placeholder="Ex: 45 minutos" error={errors.time?.message} {...register("time")} />
+          <Input
+            id="time_minutes"
+            label="Tempo (minutos)"
+            type="number"
+            inputMode="numeric"
+            min={RECIPE.timeMinutesMin}
+            max={RECIPE.timeMinutesMax}
+            placeholder="Ex: 45"
+            // a partir de uma hora, mostra como o tempo vai aparecer na receita
+            hint={minutes >= 60 && minutes <= RECIPE.timeMinutesMax ? `Aparece como ${formatTime(minutes)}` : undefined}
+            error={errors.time_minutes?.message}
+            {...register("time_minutes")}
+          />
           <Input
             id="portions"
             label="Porções"
@@ -261,7 +292,7 @@ export function RecipeForm({
 
       {/* Fotos */}
       <section className={sectionClass}>
-        <SectionTitle number={2}>Fotos</SectionTitle>
+        <SectionTitle number={2}>Fotos e vídeo</SectionTitle>
         <p className="-mt-2 text-xs font-semibold text-[#1A0A00]/50">
           Opcional. Até {RECIPE.imagesMax} fotos, do computador ou por link (https); a primeira é a capa.
         </p>
@@ -333,6 +364,17 @@ export function RecipeForm({
             <Plus className="h-4 w-4" /> Adicionar link
           </button>
         </div>
+
+        <Input
+          id="video_url"
+          label="Vídeo (opcional)"
+          type="url"
+          inputMode="url"
+          placeholder="https://www.youtube.com/watch?v=..."
+          hint="Link de um vídeo do YouTube mostrando o preparo."
+          error={errors.video_url?.message}
+          {...register("video_url")}
+        />
       </section>
 
       {/* Ingredientes */}

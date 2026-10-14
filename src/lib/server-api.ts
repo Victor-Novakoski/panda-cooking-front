@@ -1,7 +1,7 @@
 import "server-only"
 import { cache } from "react"
 import { headers } from "next/headers"
-import type { Page, Recipe, RecipeSummary } from "@/types"
+import type { Page, PublicUser, Recipe, RecipeSummary } from "@/types"
 import { clientIP } from "@/lib/bff"
 import { PER_PAGE } from "@/lib/limits"
 
@@ -49,17 +49,24 @@ export async function getLatestRecipes(count: number): Promise<RecipeSummary[]> 
   }
 }
 
-// Primeira página das receitas de uma pessoa, para a página pública dela. A
-// API ainda não tem rota de perfil público: nome e foto vêm do autor das
-// próprias receitas, então quem não publicou nada não tem página (null).
-export const getAuthorRecipes = cache(async (userId: string): Promise<Page<RecipeSummary> | null> => {
+// Perfil público de uma pessoa (nome, foto, desde quando está no site).
+export const getPublicUser = cache(async (id: string): Promise<PublicUser | null> => {
+  const res = await fetch(`${API_URL}/api/users/${encodeURIComponent(id)}`, {
+    headers: await forwardedHeaders(),
+    cache: "no-store",
+    signal: AbortSignal.timeout(10_000),
+  })
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`a API respondeu ${res.status} ao buscar o perfil`)
+  return res.json()
+})
+
+// Primeira página das receitas de uma pessoa, para a página pública dela.
+export async function getAuthorRecipes(userId: string): Promise<Page<RecipeSummary>> {
   const res = await fetch(
     `${API_URL}/api/recipes?user_id=${encodeURIComponent(userId)}&per_page=${PER_PAGE.recipes}`,
     { headers: await forwardedHeaders(), cache: "no-store", signal: AbortSignal.timeout(10_000) }
   )
-  // 422: o id não é um UUID
-  if (res.status === 422 || res.status === 404) return null
   if (!res.ok) throw new Error(`a API respondeu ${res.status} ao buscar as receitas do autor`)
-  const page: Page<RecipeSummary> = await res.json()
-  return page.items.length > 0 ? page : null
-})
+  return res.json()
+}

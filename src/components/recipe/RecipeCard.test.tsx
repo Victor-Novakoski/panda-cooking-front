@@ -9,4 +9,10 @@ describe("RecipeCard", () => {
 
     expect(screen.getByText("por Chef Maria Silva")).toBeInTheDocument()
   })
+
+  it("mostra o tempo sempre no mesmo formato", () => {
+    render(<RecipeCard recipe={makeSummary({ time_minutes: 90 })} />)
+
+    expect(screen.getByText("1h 30min")).toBeInTheDocument()
+  })
 })

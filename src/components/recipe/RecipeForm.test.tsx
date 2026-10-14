@@ -19,6 +19,7 @@ vi.mock("@/services/categories.service", () => ({
 
 const recipe = makeRecipe({
   category: { id: 2, name: "Doces" },
+  video_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
   images: [
     { id: 1, url: "https://images.unsplash.com/capa.jpg" },
     { id: 2, url: "https://exemplo.com/extra.jpg" },
@@ -48,13 +49,51 @@ describe("RecipeForm", () => {
     expect(toRecipePayload(recipeToForm(recipe))).toEqual({
       name: recipe.name,
       description: recipe.description,
-      time: "1 hora",
+      time_minutes: 60,
       portions: 2,
       category_id: 2,
+      video_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       images: [{ url: "https://images.unsplash.com/capa.jpg" }, { url: "https://exemplo.com/extra.jpg" }],
       ingredients: [{ amount: "200 g", name: "macarrão" }],
       preparations: [{ description: "Cozinhe o macarrão" }],
     })
+  })
+
+  it("o tempo é um número de minutos, e a partir de uma hora mostra como vai aparecer", async () => {
+    const onSubmit = renderForm()
+    const time = screen.getByLabelText("Tempo (minutos)")
+    expect(time).toHaveValue(60)
+    expect(screen.getByText("Aparece como 1h")).toBeInTheDocument()
+
+    await user.clear(time)
+    await user.type(time, "95")
+    expect(screen.getByText("Aparece como 1h 35min")).toBeInTheDocument()
+
+    await user.clear(time)
+    await user.type(time, "3000")
+    await user.click(screen.getByRole("button", { name: "Salvar" }))
+    expect(await screen.findByText("Use um número de 1 a 2880 minutos")).toBeInTheDocument()
+    expect(onSubmit).not.toHaveBeenCalled()
+
+    await user.clear(time)
+    await user.click(screen.getByRole("button", { name: "Salvar" }))
+    expect(await screen.findByText("Informe o tempo")).toBeInTheDocument()
+  })
+
+  it("o vídeo é opcional e só aceita link do YouTube", async () => {
+    const onSubmit = renderForm()
+    const video = screen.getByLabelText("Vídeo (opcional)")
+    expect(video).toHaveValue("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+
+    await user.clear(video)
+    await user.type(video, "https://vimeo.com/123456789")
+    await user.click(screen.getByRole("button", { name: "Salvar" }))
+    expect(await screen.findByText("Use um link de vídeo do YouTube")).toBeInTheDocument()
+    expect(onSubmit).not.toHaveBeenCalled()
+
+    await user.clear(video)
+    await user.click(screen.getByRole("button", { name: "Salvar" }))
+    await vi.waitFor(() => expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ video_url: "" })))
   })
 
   it("mostra a categoria salva quando as opções chegam", async () => {
