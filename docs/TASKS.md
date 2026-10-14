@@ -99,3 +99,33 @@ Lista levantada navegando pelo site no computador e no celular (13/10/2026). O q
 **Ambiente local**
 
 - [ ] O service worker de outro projeto que também roda em `localhost:3000` (Nossos Lugares) guarda `/_next/static/*` para sempre e entrega JavaScript antigo ao Panda (erro "isImageUrl is not a function"). Correção na origem: registrar aquele service worker só em produção. Enquanto isso, limpar os dados de `localhost:3000` no navegador
+
+## Etapa 7 — Próximas melhorias
+
+Segunda leva de sugestões (13/10/2026), ainda sem nada começado. O que depende da API tem o par em [TASKS.md da API](https://github.com/Victor-Novakoski/panda-cooking-go-api/blob/develop/docs/TASKS.md). Continuam valendo, das etapas anteriores: o deploy e os prints do README (etapa 4), o link para o autor nos cartões e nos comentários e o recuperar senha (etapa 6).
+
+**Para quem está cozinhando (só front)**
+
+- [ ] Marcar ingredientes e passos como feitos: tocar num item risca ele, na receita e no modo cozinha
+- [ ] Lista de compras: botão "Copiar ingredientes", com as quantidades já ajustadas para as porções escolhidas
+- [ ] Timer no modo cozinha: quando o passo cita um tempo ("cozinhe por 15 minutos"), botão "Iniciar 15 min" com aviso sonoro no fim
+- [ ] Receitas parecidas no fim da receita: "Mais de {autor}" e "Mais em {categoria}" (a API já filtra por autor e por categoria)
+
+**Para quem publica (só front)**
+
+- [ ] Rascunho automático: guardar o formulário de receita no navegador e oferecer "continuar de onde parou"; hoje fechar a aba no meio perde tudo
+- [ ] Reordenar passos e ingredientes no formulário, com setas para subir e descer
+
+**Dependem da API**
+
+- [ ] Buscar por ingrediente ("o que dá para fazer com frango e batata?"): campo na página de receitas
+- [ ] Moderação: botão "Denunciar" na receita e no comentário, e o admin podendo apagar receita imprópria
+
+**Para o site ser encontrado**
+
+- [ ] Dados estruturados de receita (JSON-LD `schema.org/Recipe`, com o nonce da CSP): foto, tempo e porções no resultado do Google
+- [ ] `sitemap.xml` e imagem de compartilhamento (Open Graph) própria
+
+**Decidido não fazer**
+
+- Número de favoritos em cada cartão: vira placar e influencia quem vê, o mesmo motivo de não ter nota
