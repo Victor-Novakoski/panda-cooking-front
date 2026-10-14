@@ -9,7 +9,7 @@ export function Header() {
   const isActive = (href: string) => pathname === href
 
   return (
-    <header className="relative border-b-4 border-[#D4A017] bg-[#8B1A1A]">
+    <header className="relative border-b-4 border-[#D4A017] bg-[#8B1A1A] print:hidden">
       <div
         className="h-1 w-full"
         style={{ background: "repeating-linear-gradient(90deg, #D4A017 0, #D4A017 12px, #A07010 12px, #A07010 24px)" }}
