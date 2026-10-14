@@ -22,7 +22,27 @@ describe("PhotoCarousel", () => {
   it("com uma foto só, não mostra setas nem bolinhas", () => {
     render(<PhotoCarousel images={images.slice(0, 1)} name="Bolo" />)
 
+    expect(screen.getByRole("img", { name: "Bolo" })).toBeInTheDocument()
+    expect(screen.queryByRole("button")).not.toBeInTheDocument()
+  })
+
+  it("a primeira foto leva o nome da receita e as outras são numeradas", () => {
+    render(<PhotoCarousel images={images} name="Bolo" />)
+
+    expect(screen.getByRole("img", { name: "Bolo" })).toBeInTheDocument()
     expect(screen.getByRole("img", { name: "Bolo, foto 2" })).toBeInTheDocument()
+    expect(screen.getByRole("img", { name: "Bolo, foto 3" })).toBeInTheDocument()
+  })
+
+  it("sem foto, mostra o prato no lugar e o que foi passado por cima", () => {
+    render(
+      <PhotoCarousel images={[]} name="Bolo">
+        <h1>Bolo</h1>
+      </PhotoCarousel>
+    )
+
+    expect(screen.getByRole("img", { name: "Bolo" })).toHaveTextContent("🍽️")
+    expect(screen.getByRole("heading", { name: "Bolo" })).toBeInTheDocument()
     expect(screen.queryByRole("button")).not.toBeInTheDocument()
   })
 })

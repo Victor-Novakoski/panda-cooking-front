@@ -59,3 +59,41 @@ Backlog em ordem. Só se trabalha na etapa atual; o que surgir no caminho entra 
 - [x] Página inicial com as receitas mais novas; 404 de verdade para receita que não existe
 - [x] `next/image` só otimiza o host do seed; foto que não carrega vira emoji
 - [x] Testes de sessão, repasse, CSP, formulários, paginação e telas (178 no Vitest)
+
+## Etapa 6 — Melhorias de uso
+
+Lista levantada navegando pelo site no computador e no celular (13/10/2026). O que mexe no banco tem o par em [TASKS.md da API](https://github.com/Victor-Novakoski/panda-cooking-go-api/blob/develop/docs/TASKS.md).
+
+**Feito**
+
+- [x] Página inicial: sai o texto de apoio do topo, fica só o biscoito da sorte
+- [x] Capa da receita vira carrossel com todas as fotos (antes a capa ficava de fora e, com duas fotos, a segunda aparecia sozinha, sem setas); a foto aparece inteira, com a sobra desfocada
+- [x] Imprimir receita: botão na página; no papel saem só o nome, os ingredientes e o modo de preparo
+
+**Design (só front)**
+
+- [ ] No celular, ingredientes antes do modo de preparo: hoje a ordem é descrição, preparo, comentários e só então informações e ingredientes
+- [ ] Página inicial para quem está logado: "Criar conta grátis" e o bloco "Pronto para cozinhar?" viram "Nova receita" / "Minhas receitas"
+- [ ] Topo da página inicial no celular: título menor, panda mascote visível e botão "Cadastrar" no cabeçalho
+- [ ] Nome do autor nos cartões: "Chef Maria Silva" aparece como "por Chef"; mostrar o nome inteiro, cortando com reticências
+- [ ] Capa da receita com foto em pé: decidir entre a foto inteira com faixas desfocadas (como está) e preencher a capa com corte
+
+**Funcionalidades só no front**
+
+- [ ] Modo cozinha: um passo por vez em letra grande, tela sem apagar (`navigator.wakeLock`) e ingredientes à mão
+- [ ] Compartilhar: botão que abre o compartilhamento do celular (`navigator.share`) ou copia o link
+- [ ] Perfil público do autor: clicar em "por João" abre a página dele com as receitas (a API já filtra por `user_id`; conferir se falta uma rota pública com nome e foto)
+
+**Funcionalidades que dependem da API**
+
+- [ ] Tempo em minutos: o site formata sempre igual ("40 min", "1h 30min") e o formulário pede número; hoje é texto livre e aparece "40", "20 minutos", "3 horas"
+- [ ] Ajustar porções: "− 4 porções +" na receita recalculando as quantidades dos ingredientes
+- [ ] Ordenar a lista (mais novas, mais favoritadas, mais rápidas) e filtrar por tempo
+- [ ] Avaliação com estrelas (1 a 5) na receita e a média nos cartões
+- [ ] Vídeo da receita por link do YouTube, numa seção própria abaixo da descrição
+- [ ] Categorias pelo admin: botão "Nova categoria" na página de receitas, só para admin
+- [ ] Recuperar senha: telas de "esqueci a senha" e de nova senha
+
+**Ambiente local**
+
+- [ ] O service worker de outro projeto que também roda em `localhost:3000` (Nossos Lugares) guarda `/_next/static/*` para sempre e entrega JavaScript antigo ao Panda (erro "isImageUrl is not a function"). Correção na origem: registrar aquele service worker só em produção. Enquanto isso, limpar os dados de `localhost:3000` no navegador
