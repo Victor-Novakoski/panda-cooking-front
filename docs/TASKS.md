@@ -75,9 +75,9 @@ Lista levantada navegando pelo site no computador e no celular (13/10/2026). O q
 - [x] No celular, ingredientes antes do modo de preparo (antes vinham depois dos comentários)
 - [x] Página inicial para quem está logado: os convites para criar conta viram "Publicar uma receita" e "Minhas receitas" (decidido no servidor, pelo cookie de sessão, sem piscar)
 - [x] Topo da página inicial no celular: título menor e panda mascote visível
-- [ ] Botão "Cadastrar" no cabeçalho do celular: não cabe ao lado de "Início", "Receitas" e "Entrar"; decidir o que sai (o topo da página inicial já tem "Criar conta grátis")
+- [x] Botão "Cadastrar" no cabeçalho do celular: decidido deixar como está, só "Entrar" (não cabe ao lado de "Início" e "Receitas", e o topo da página inicial já tem "Criar conta grátis")
 - [x] Nome do autor inteiro nos cartões ("Chef Maria Silva" aparecia como "por Chef")
-- [ ] Capa da receita com foto em pé: decidir entre a foto inteira com faixas desfocadas (como está) e preencher a capa com corte
+- [x] Capa da receita com foto em pé: decidido deixar como está, a foto inteira com faixas desfocadas dos lados
 
 **Funcionalidades só no front**
 
