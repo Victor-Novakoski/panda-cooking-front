@@ -94,7 +94,7 @@ docker compose up --build
 | API | http://localhost:8080/health |
 | OpenAPI | http://localhost:8080/api/openapi.yaml |
 
-Na primeira subida a API cria dez receitas e três usuários de demonstração. Todos entram com a senha `panda-cooking-demo`:
+Na primeira subida a API cria dezoito receitas e três usuários de demonstração. Todos entram com a mesma senha, definida no seed da API (`internal/seed/seed.go`, constante `DemoPassword`):
 
 | Usuário | E-mail |
 | --- | --- |
@@ -130,8 +130,8 @@ npm run dev                  # http://localhost:3000
 1. Abra http://localhost:3000 e clique em "Explorar receitas".
 2. Busque por `pao` (sem acento mesmo) e repare que acha "Pão de Queijo Mineiro". Filtre por "Doces e Sobremesas" e copie a URL: ela carrega a lista exatamente assim.
 3. Abra uma receita e clique em "Entrar": depois do login você volta para ela.
-4. Entre como `maria@pandacooking.com` com a senha `panda-cooking-demo`, favorite a receita e deixe um comentário.
-5. Em "Nova receita", envie o formulário vazio para ver a validação, e depois preencha e publique uma receita sua. Para as fotos, cole um link `https` de imagem.
+4. Entre como `maria@pandacooking.com` com a senha de demonstração, favorite a receita e deixe um comentário.
+5. Em "Nova receita", envie o formulário vazio para ver a validação, e depois preencha e publique uma receita sua. Para as fotos, envie uma do computador ou cole um link `https`.
 6. No perfil, veja a receita nova em "Minhas receitas" e a favoritada em "Favoritas".
 7. Recarregue a página: você continua logado, mesmo sem nenhum token guardado no navegador.
 
@@ -171,21 +171,21 @@ O teste fica ao lado do arquivo testado (`api.ts` → `api.test.ts`, `page.tsx` 
 - **Limites dos formulários copiados da API** (`src/lib/limits.ts`): o aviso chega antes do envio, mas quem decide continua sendo a API.
 - **Página pública renderizada no servidor** e página de quem está logado buscada no navegador: a primeira precisa de prévia em link compartilhado, a segunda depende da sessão.
 
-O registro completo está em [MEMORY.md](docs/MEMORY.md).
+O registro completo, uma decisão por arquivo, está em [docs/decisoes](docs/decisoes/).
 
 ## Documentação
 
 | Documento | Conteúdo |
 | --- | --- |
 | [PRD](docs/PRD.md) | O que o produto faz, tela por tela |
-| [Arquitetura](docs/ARCHITECTURE.md) | Renderização, sessão, pastas e repasse `/api` |
+| [Arquitetura](docs/ARCHITECTURE.md) | Pastas, renderização, sessão e imagens |
 | [Segurança](docs/SECURITY.md) | Cada risco, a CSP e o que fica para o deploy |
 | [Design](docs/DESIGN.md) | Convenções das interfaces |
-| [Regras](docs/RULES.md) | Código, segurança, testes e fluxo de git |
-| [Tarefas](docs/TASKS.md) e [Memória](docs/MEMORY.md) | O que foi feito e o porquê de cada decisão |
+| [Decisões](docs/decisoes/) | O porquê de cada escolha, uma por arquivo |
+| [Índice](docs/INDEX.md) e [CLAUDE.md](CLAUDE.md) | Regras de código, testes e git, e onde ler cada assunto |
 
 ## Próximos passos
 
-O deploy: front e API em containers atrás de HTTPS (os cookies `Secure` dependem disso), com `API_URL` em tempo de execução. O que falta está em [TASKS.md](docs/TASKS.md).
+O deploy: front e API em containers atrás de HTTPS (os cookies `Secure` dependem disso), com `API_URL` em tempo de execução. O que falta está nas [issues](https://github.com/Victor-Novakoski/panda-cooking-front/issues).
 
 Feito por [Victor Novakoski](https://github.com/Victor-Novakoski).
