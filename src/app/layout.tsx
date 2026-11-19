@@ -4,6 +4,7 @@ import { Nunito } from "next/font/google"
 import "./globals.css"
 import { Providers } from "@/lib/providers"
 import { SESSION_COOKIE } from "@/lib/cookies"
+import { DEFAULT_OG_IMAGE, SITE_DESCRIPTION, SITE_URL } from "@/lib/seo"
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -13,7 +14,18 @@ const nunito = Nunito({
 
 export const metadata: Metadata = {
   title: { default: "Panda Cooking", template: "%s | Panda Cooking" },
-  description: "Descubra e compartilhe receitas incríveis",
+  description: SITE_DESCRIPTION,
+  // base dos endereços absolutos de og:image e do canonical
+  metadataBase: new URL(SITE_URL),
+  openGraph: {
+    type: "website",
+    siteName: "Panda Cooking",
+    locale: "pt_BR",
+    title: "Panda Cooking",
+    description: SITE_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: { card: "summary_large_image", title: "Panda Cooking", description: SITE_DESCRIPTION, images: [DEFAULT_OG_IMAGE.url] },
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
