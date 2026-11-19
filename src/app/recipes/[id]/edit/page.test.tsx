@@ -98,4 +98,29 @@ describe("EditRecipePage", () => {
     await vi.waitFor(() => expect(push).toHaveBeenCalledWith("/profile"))
     expect(recipesService.delete).toHaveBeenCalledWith("r1")
   })
+
+  it("receita de demonstração não abre o formulário", async () => {
+    loginAs({ id: "dono" })
+    vi.mocked(recipesService.getById).mockResolvedValue({ ...recipe, is_demo: true })
+    renderWithClient(<EditRecipePage />)
+
+    expect(await screen.findByText("Receitas de demonstração não podem ser alteradas nem apagadas.")).toBeInTheDocument()
+    expect(screen.queryByLabelText("Nome da receita")).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Apagar receita" })).not.toBeInTheDocument()
+  })
+
+  it("recusa da API ao apagar mostra a mensagem dela", async () => {
+    loginAs({ id: "dono" })
+    vi.mocked(recipesService.delete).mockRejectedValue(
+      apiError(403, { error: "receitas de demonstração não podem ser alteradas nem apagadas" })
+    )
+    renderWithClient(<EditRecipePage />)
+    const user = userEvent.setup()
+
+    await user.click(await screen.findByRole("button", { name: "Apagar receita" }))
+    await user.click(screen.getByRole("button", { name: /sim, apagar/i }))
+
+    expect(await screen.findByText("Receitas de demonstração não podem ser alteradas nem apagadas")).toBeInTheDocument()
+    expect(push).not.toHaveBeenCalled()
+  })
 })
