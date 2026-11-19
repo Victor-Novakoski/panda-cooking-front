@@ -7,6 +7,8 @@ export interface User {
   // vazio quando a pessoa não tem foto
   image_profile: string
   is_adm: boolean
+  // conta de demonstração (senha pública): a API não deixa mudar nem apagar
+  is_demo: boolean
   created_at?: string
 }
 
@@ -74,6 +76,8 @@ export interface Recipe {
   images: ImageRecipe[]
   ingredients: IngredientRecipe[]
   preparations: Preparation[]
+  // receita do seed de demonstração: a API não deixa mudar nem apagar
+  is_demo: boolean
   created_at: string
   updated_at: string
 }
