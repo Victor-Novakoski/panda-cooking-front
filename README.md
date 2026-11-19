@@ -4,7 +4,7 @@
 
 Rede de receitas. Qualquer pessoa navega, busca e lê as receitas; com conta, publica as suas com fotos, ingredientes e modo de preparo, comenta e guarda as favoritas.
 
-Este é o front, em Next.js. A API, em Go, está em [panda-cooking-go-api](https://github.com/Victor-Novakoski/panda-cooking-go-api). Roda inteiro na máquina com `docker compose up`; o deploy é a próxima etapa.
+Este é o front, em Next.js. A API, em Go, está em [panda-cooking-go-api](https://github.com/Victor-Novakoski/panda-cooking-go-api). Está no ar em **https://pandacooking.vercel.app** (a primeira visita depois de um tempo parado pode levar até um minuto, enquanto a API acorda no plano grátis). Também roda inteiro na máquina com `docker compose up`.
 
 ![Página inicial do Panda Cooking, com a chamada "Descubra receitas incríveis com sabor de aventura" e os botões Explorar receitas e Criar conta grátis](docs/telas/inicio.png)
 
