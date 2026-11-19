@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getRecipe } from "@/lib/server-api"
+import { recipeMetadata } from "@/lib/seo"
 import { formatDate, isImageUrl } from "@/lib/utils"
 import { Header } from "@/components/layout/Header"
 import { FavoriteButton } from "@/components/recipe/FavoriteButton"
@@ -25,12 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { id } = await params
   const recipe = await getRecipe(id)
   if (!recipe) return { title: "Receita não encontrada" }
-  const cover = recipe.images[0]?.url
-  return {
-    title: recipe.name,
-    description: recipe.description.slice(0, 160),
-    openGraph: { title: recipe.name, description: recipe.description.slice(0, 160), images: cover ? [cover] : [] },
-  }
+  return recipeMetadata(recipe)
 }
 
 export default async function RecipePage({ params }: PageProps) {

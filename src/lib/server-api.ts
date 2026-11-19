@@ -70,3 +70,27 @@ export async function getAuthorRecipes(userId: string): Promise<Page<RecipeSumma
   if (!res.ok) throw new Error(`a API respondeu ${res.status} ao buscar as receitas do autor`)
   return res.json()
 }
+
+// Endereço e data de cada receita para o sitemap. Páginas de até 50 (o máximo
+// da API), no máximo 20 páginas e 8 s no total; se a API estiver dormindo ou
+// falhar no meio, devolve o que já tinha em vez de derrubar o sitemap.
+export async function getSitemapRecipes(): Promise<{ id: string; created_at: string }[]> {
+  const out: { id: string; created_at: string }[] = []
+  const deadline = AbortSignal.timeout(8_000)
+  try {
+    for (let page = 1; page <= 20; page++) {
+      const res = await fetch(`${API_URL}/api/recipes?per_page=50&page=${page}`, {
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+        signal: deadline,
+      })
+      if (!res.ok) break
+      const data: Page<RecipeSummary> = await res.json()
+      out.push(...data.items.map(({ id, created_at }) => ({ id, created_at })))
+      if (page >= data.total_pages) break
+    }
+  } catch {
+    // devolve o que deu para buscar
+  }
+  return out
+}
