@@ -50,4 +50,13 @@ describe("ProfilePage", () => {
     expect(await screen.findByText("Você ainda não criou nenhuma receita.")).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Criar a primeira receita" })).toHaveAttribute("href", "/recipes/new")
   })
+
+  it("conta de demonstração não mostra editar perfil", async () => {
+    loginAs({ is_demo: true })
+    renderWithClient(<ProfilePage />)
+
+    expect(await screen.findByText("Minha Coxinha")).toBeInTheDocument()
+    expect(screen.queryByRole("link", { name: /editar perfil/i })).not.toBeInTheDocument()
+    expect(screen.getAllByRole("link", { name: /nova receita/i }).length).toBeGreaterThan(0)
+  })
 })

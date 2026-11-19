@@ -80,7 +80,7 @@ export default async function RecipePage({ params }: PageProps) {
 
             <aside className="flex flex-col gap-4 lg:col-start-3 lg:row-span-4 lg:row-start-1 print:mb-8">
               <div className="contents print:hidden">
-                <RecipeOwnerActions recipeId={recipe.id} ownerId={recipe.author.id} />
+                <RecipeOwnerActions recipeId={recipe.id} ownerId={recipe.author.id} isDemo={recipe.is_demo} />
               </div>
               <CookMode name={recipe.name} ingredients={recipe.ingredients} preparations={recipe.preparations} />
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-1 xl:grid-cols-2 print:hidden">
