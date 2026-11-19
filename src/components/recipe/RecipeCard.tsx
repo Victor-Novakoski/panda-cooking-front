@@ -2,7 +2,7 @@ import Link from "next/link"
 import type { RecipeSummary } from "@/types"
 import { LinkPending } from "./LinkPending"
 import { RecipeImage } from "./RecipeImage"
-import { portionsLabel } from "./format"
+import { formatTime, portionsLabel } from "./format"
 import { Clock, Users } from "lucide-react"
 
 export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
@@ -30,12 +30,12 @@ export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
           <p className="mb-3 line-clamp-2 text-xs leading-relaxed text-[#1A0A00]/60">{recipe.description}</p>
           <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t-2 border-dashed border-[#F5E6C8] pt-3 text-xs font-bold text-[#1A0A00]/50">
             <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" aria-hidden /> {recipe.time}
+              <Clock className="h-3 w-3" aria-hidden /> {formatTime(recipe.time_minutes)}
             </span>
             <span className="flex items-center gap-1">
               <Users className="h-3 w-3" aria-hidden /> {portionsLabel(recipe.portions)}
             </span>
-            <span className="ml-auto truncate">por {recipe.author.name.split(" ")[0]}</span>
+            <span className="ml-auto min-w-0 max-w-full truncate">por {recipe.author.name}</span>
           </div>
         </div>
         <LinkPending />

@@ -74,14 +74,14 @@ describe("RegisterPage", () => {
     expect(await screen.findByText("Senha muito comum, escolha outra")).toBeInTheDocument()
   })
 
-  it("cria a conta, entra e vai para o dashboard", async () => {
+  it("cria a conta, entra e vai para a lista de receitas", async () => {
     vi.mocked(usersService.signup).mockResolvedValue(maria)
     vi.mocked(authService.login).mockResolvedValue({ access_token: "token-abc", token_type: "Bearer", expires_in: 900, user: maria })
     renderWithClient(<RegisterPage />)
 
     await fill()
 
-    await vi.waitFor(() => expect(replace).toHaveBeenCalledWith("/dashboard"))
+    await vi.waitFor(() => expect(replace).toHaveBeenCalledWith("/recipes"))
     expect(usersService.signup).toHaveBeenCalledWith({ name: "Maria Silva", email: "maria@pandacooking.com", password: "panda come bambu" })
     expect(useAuthStore.getState().status).toBe("authenticated")
   })

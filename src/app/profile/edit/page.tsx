@@ -14,13 +14,14 @@ import { useRequireAuth } from "@/hooks/useRequireAuth"
 import { announce } from "@/lib/session"
 import { showApiErrors } from "@/lib/forms"
 import { URL_MAX, USER } from "@/lib/limits"
-import { isHttpsUrl } from "@/lib/utils"
+import { isImageUrl, isUploadPath } from "@/lib/utils"
 import { Header } from "@/components/layout/Header"
 import { SessionNotice } from "@/components/layout/SessionNotice"
 import { Avatar } from "@/components/user/Avatar"
 import { Input } from "@/components/ui/Input"
 import { Button } from "@/components/ui/Button"
 import { FormError } from "@/components/ui/FormError"
+import { PhotoUpload } from "@/components/ui/PhotoUpload"
 import { ArrowLeft, Trash2 } from "lucide-react"
 
 const profileSchema = z.object({
@@ -33,7 +34,7 @@ const profileSchema = z.object({
     .string()
     .trim()
     .max(URL_MAX, `Use no máximo ${URL_MAX} caracteres`)
-    .refine((v) => v === "" || isHttpsUrl(v), "Use um link que comece com https://"),
+    .refine((v) => v === "" || isImageUrl(v), "Use um link que comece com https:// ou envie a foto do computador"),
 })
 
 type ProfileValues = z.infer<typeof profileSchema>
@@ -104,7 +105,7 @@ function ProfileDetailsForm() {
       className="flex flex-col gap-5 rounded-2xl border-[3px] border-[#1A0A00] bg-white p-6 shadow-[4px_4px_0px_#1A0A00]"
     >
       <div className="flex items-center gap-4">
-        <Avatar key={photo} src={isHttpsUrl(photo ?? "") ? photo : ""} alt="Prévia da foto" size="lg" />
+        <Avatar key={photo} src={isImageUrl(photo ?? "") ? photo : ""} alt="Prévia da foto" size="lg" />
         <div className="min-w-0">
           <p className="truncate font-black text-[#1A0A00]">{user?.email}</p>
           <p className="text-xs font-semibold text-[#1A0A00]/50">O e-mail não pode ser trocado.</p>
@@ -114,22 +115,39 @@ function ProfileDetailsForm() {
       <Input id="name" label="Nome" autoComplete="name" error={errors.name?.message} {...register("name")} />
 
       <div className="flex flex-col gap-2">
-        <Input
-          id="image_profile"
-          label="Link da foto (opcional)"
-          placeholder="https://..."
-          error={errors.image_profile?.message}
-          {...register("image_profile")}
-        />
-        {photo && (
-          <button
-            type="button"
-            onClick={() => setValue("image_profile", "", { shouldDirty: true })}
-            className="self-start text-xs font-black text-[#C0392B] hover:underline"
-          >
-            Remover foto
-          </button>
+        {isUploadPath(photo ?? "") ? (
+          <>
+            <input type="hidden" {...register("image_profile")} />
+            <p className="text-xs font-extrabold uppercase tracking-widest text-[#1A0A00]">Foto</p>
+            <p className="flex h-11 items-center rounded-xl border-[3px] border-dashed border-[#1A0A00]/30 px-3 text-sm font-bold text-[#1A0A00]/60">
+              Foto enviada do computador
+            </p>
+          </>
+        ) : (
+          <Input
+            id="image_profile"
+            label="Link da foto (opcional)"
+            placeholder="https://..."
+            error={errors.image_profile?.message}
+            {...register("image_profile")}
+          />
         )}
+        <div className="flex flex-wrap items-center gap-4">
+          <PhotoUpload
+            label="Enviar do computador"
+            max={1}
+            onUploaded={([url]) => setValue("image_profile", url, { shouldDirty: true, shouldValidate: true })}
+          />
+          {photo && (
+            <button
+              type="button"
+              onClick={() => setValue("image_profile", "", { shouldDirty: true })}
+              className="text-xs font-black text-[#C0392B] hover:underline"
+            >
+              Remover foto
+            </button>
+          )}
+        </div>
       </div>
 
       <FormError message={errors.root?.server?.message} />

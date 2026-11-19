@@ -17,9 +17,14 @@ export function AuthLayout({ emoji, quote, highlight, author, title, subtitle, c
   return (
     <div className="flex min-h-screen">
       <div className="bg-lattice hidden flex-col justify-between border-r-4 border-[#1A0A00] bg-[#8B1A1A] p-12 lg:flex lg:w-1/2">
-        <Link href="/">
-          <div className="text-xl font-black text-[#F0C040]">🐼 Panda Cooking</div>
-          <div className="mt-1 text-xs font-bold tracking-[3px] text-[#D4A017]">熊猫厨房</div>
+        <Link href="/recipes" className="group flex items-center gap-3 self-start">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border-[3px] border-[#A07010] bg-[#D4A017] text-2xl shadow-[3px_3px_0px_#1A0A00] transition-transform group-hover:-translate-y-0.5">
+            🐼
+          </div>
+          <div>
+            <div className="text-xl font-black text-[#F0C040] group-hover:underline">Panda Cooking</div>
+            <div className="text-xs font-bold tracking-[3px] text-[#D4A017]">熊猫厨房</div>
+          </div>
         </Link>
         <figure>
           <div className="mb-6 text-center text-8xl" aria-hidden>
@@ -35,7 +40,7 @@ export function AuthLayout({ emoji, quote, highlight, author, title, subtitle, c
 
       <main className="flex flex-1 flex-col items-center justify-center bg-[#FDF6E3] px-6 py-12">
         <div className="w-full max-w-sm">
-          <Link href="/" className="mb-8 flex items-center gap-2 lg:hidden">
+          <Link href="/recipes" className="mb-8 flex items-center gap-2 lg:hidden">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl border-[3px] border-[#A07010] bg-[#D4A017] text-xl shadow-[2px_2px_0px_#1A0A00]">
               🐼
             </div>
@@ -46,6 +51,13 @@ export function AuthLayout({ emoji, quote, highlight, author, title, subtitle, c
           <p className="mb-6 mt-1 text-sm font-semibold text-[#1A0A00]/50">{subtitle}</p>
 
           {children}
+
+          <Link
+            href="/recipes"
+            className="mt-6 inline-flex items-center gap-1.5 text-sm font-black text-[#1A0A00]/50 hover:text-[#C0392B]"
+          >
+            ← Voltar para as receitas
+          </Link>
         </div>
       </main>
     </div>

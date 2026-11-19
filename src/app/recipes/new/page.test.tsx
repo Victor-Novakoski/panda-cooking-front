@@ -19,6 +19,7 @@ describe("NewRecipePage", () => {
   beforeEach(() => {
     push.mockReset()
     vi.mocked(recipesService.create).mockReset()
+    window.localStorage.clear()
   })
 
   it("publica a receita e abre a página dela", async () => {
@@ -29,7 +30,7 @@ describe("NewRecipePage", () => {
 
     await user.type(screen.getByLabelText("Nome da receita"), "Bolo de fubá")
     await user.type(screen.getByLabelText("Descrição"), "O bolo da vó, fofinho e cheiroso.")
-    await user.type(screen.getByLabelText("Tempo"), "50 minutos")
+    await user.type(screen.getByLabelText("Tempo (minutos)"), "50")
     await user.type(screen.getByLabelText("Porções"), "8")
     await user.selectOptions(screen.getByLabelText("Categoria"), await screen.findByRole("option", { name: "Massas" }))
     await user.type(screen.getByLabelText("Quantidade do ingrediente 1"), "2 xícaras")
@@ -38,12 +39,15 @@ describe("NewRecipePage", () => {
     await user.click(screen.getByRole("button", { name: /publicar receita/i }))
 
     await vi.waitFor(() => expect(push).toHaveBeenCalledWith("/recipes/nova"))
+    // publicou: o rascunho daquela conta não fica para trás
+    await vi.waitFor(() => expect(window.localStorage.getItem("panda:rascunho:nova-receita:maria")).toBeNull())
     expect(recipesService.create).toHaveBeenCalledWith({
       name: "Bolo de fubá",
       description: "O bolo da vó, fofinho e cheiroso.",
-      time: "50 minutos",
+      time_minutes: 50,
       portions: 8,
       category_id: 2,
+      video_url: "",
       images: [],
       ingredients: [{ amount: "2 xícaras", name: "fubá" }],
       preparations: [{ description: "Misture tudo e asse." }],

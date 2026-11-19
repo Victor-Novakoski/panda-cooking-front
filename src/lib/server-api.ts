@@ -1,8 +1,9 @@
 import "server-only"
 import { cache } from "react"
 import { headers } from "next/headers"
-import type { Page, Recipe, RecipeSummary } from "@/types"
+import type { Page, PublicUser, Recipe, RecipeSummary } from "@/types"
 import { clientIP } from "@/lib/bff"
+import { PER_PAGE } from "@/lib/limits"
 
 // Chamadas feitas no servidor do Next (páginas renderizadas lá). Vão direto
 // para a API pela rede interna, sem passar pelo /api do próprio front.
@@ -46,4 +47,26 @@ export async function getLatestRecipes(count: number): Promise<RecipeSummary[]> 
   } catch {
     return []
   }
+}
+
+// Perfil público de uma pessoa (nome, foto, desde quando está no site).
+export const getPublicUser = cache(async (id: string): Promise<PublicUser | null> => {
+  const res = await fetch(`${API_URL}/api/users/${encodeURIComponent(id)}`, {
+    headers: await forwardedHeaders(),
+    cache: "no-store",
+    signal: AbortSignal.timeout(10_000),
+  })
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`a API respondeu ${res.status} ao buscar o perfil`)
+  return res.json()
+})
+
+// Primeira página das receitas de uma pessoa, para a página pública dela.
+export async function getAuthorRecipes(userId: string): Promise<Page<RecipeSummary>> {
+  const res = await fetch(
+    `${API_URL}/api/recipes?user_id=${encodeURIComponent(userId)}&per_page=${PER_PAGE.recipes}`,
+    { headers: await forwardedHeaders(), cache: "no-store", signal: AbortSignal.timeout(10_000) }
+  )
+  if (!res.ok) throw new Error(`a API respondeu ${res.status} ao buscar as receitas do autor`)
+  return res.json()
 }

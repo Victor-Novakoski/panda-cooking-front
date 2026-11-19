@@ -77,7 +77,7 @@ export default function RegisterPage() {
       queryClient.removeQueries({ queryKey: ME_KEY })
       setSession(user, access_token)
       announce("login")
-      router.replace("/dashboard")
+      router.replace("/recipes")
     } catch {
       // A conta existe; só o login automático falhou (limite de tentativas, rede).
       router.replace("/auth/login?created=1")

@@ -33,24 +33,24 @@ describe("proxy", () => {
     expect(proxy(request("/recipes/abc-123/edit", { session: true })).headers.get("location")).toBeNull()
   })
 
-  it("com sessão, login e cadastro vão para a página pedida ou o dashboard", () => {
-    expect(proxy(request("/auth/login", { session: true })).headers.get("location")).toBe("http://localhost:3000/dashboard")
+  it("com sessão, login e cadastro vão para a página pedida ou a lista de receitas", () => {
+    expect(proxy(request("/auth/login", { session: true })).headers.get("location")).toBe("http://localhost:3000/recipes")
     expect(proxy(request("/auth/login?next=/profile", { session: true })).headers.get("location")).toBe(
       "http://localhost:3000/profile"
     )
     expect(proxy(request("/auth/register", { session: true })).headers.get("location")).toBe(
-      "http://localhost:3000/dashboard"
+      "http://localhost:3000/recipes"
     )
   })
 
   it("não redireciona para fora do site (open redirect)", () => {
     const res = proxy(request("/auth/login?next=//malicioso.site", { session: true }))
-    expect(res.headers.get("location")).toBe("http://localhost:3000/dashboard")
+    expect(res.headers.get("location")).toBe("http://localhost:3000/recipes")
   })
 
   describe("cabeçalhos de segurança", () => {
     it("CSP com nonce na resposta e na requisição (o Next aplica nos scripts)", () => {
-      const res = proxy(request("/dashboard"))
+      const res = proxy(request("/recipes"))
       const csp = res.headers.get("content-security-policy")!
       const nonce = res.headers.get("x-middleware-request-x-nonce")!
 
@@ -58,6 +58,8 @@ describe("proxy", () => {
       expect(csp).toContain(`script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`)
       expect(csp).toContain("frame-ancestors 'none'")
       expect(csp).toContain("object-src 'none'")
+      // o único site que pode aparecer embutido é o player do vídeo da receita
+      expect(csp).toContain("frame-src https://www.youtube-nocookie.com;")
       expect(csp).not.toContain("unsafe-eval")
       expect(res.headers.get("x-middleware-request-content-security-policy")).toBe(csp)
     })

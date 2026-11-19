@@ -21,7 +21,18 @@ export function clientIP(headers: Headers): string | undefined {
   const last = headers.get("x-forwarded-for")?.split(",").at(-1)?.trim()
   return last || undefined
 }
-const FORWARDED_RESPONSE_HEADERS = ["content-type", "location", "retry-after", "www-authenticate", "x-request-id"]
+
+// cache-control e content-security-policy: a foto enviada (/api/uploads) vem com
+// cache de um ano e CSP sandbox; o resto da API manda no-store.
+const FORWARDED_RESPONSE_HEADERS = [
+  "cache-control",
+  "content-security-policy",
+  "content-type",
+  "location",
+  "retry-after",
+  "www-authenticate",
+  "x-request-id",
+]
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"])
 const NULL_BODY_STATUS = new Set([101, 204, 205, 304])

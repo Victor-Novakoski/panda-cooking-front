@@ -61,13 +61,13 @@ describe("LoginPage", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Muitas tentativas de login")
   })
 
-  it("abre a sessão em memória e vai para o dashboard", async () => {
+  it("abre a sessão em memória e vai para a lista de receitas", async () => {
     vi.mocked(authService.login).mockResolvedValue({ access_token: "token-abc", token_type: "Bearer", expires_in: 900, user: maria })
     renderWithClient(<LoginPage />)
 
     await fillAndSubmit("maria@pandacooking.com", "panda-cooking-demo")
 
-    await vi.waitFor(() => expect(replace).toHaveBeenCalledWith("/dashboard"))
+    await vi.waitFor(() => expect(replace).toHaveBeenCalledWith("/recipes"))
     expect(authService.login).toHaveBeenCalledWith({ email: "maria@pandacooking.com", password: "panda-cooking-demo" })
     expect(useAuthStore.getState()).toMatchObject({ user: maria, token: "token-abc", status: "authenticated" })
     expect(localStorage.length).toBe(0)
@@ -90,7 +90,7 @@ describe("LoginPage", () => {
 
     await fillAndSubmit("maria@pandacooking.com", "panda-cooking-demo")
 
-    await vi.waitFor(() => expect(replace).toHaveBeenCalledWith("/dashboard"))
+    await vi.waitFor(() => expect(replace).toHaveBeenCalledWith("/recipes"))
   })
 
   it("avisa que a conta acabou de ser criada", () => {

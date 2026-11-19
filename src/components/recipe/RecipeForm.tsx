@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useForm, useFieldArray, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -10,12 +10,16 @@ import type { RecipePayload } from "@/services/recipes.service"
 import { Input } from "@/components/ui/Input"
 import { Textarea } from "@/components/ui/Textarea"
 import { FormError } from "@/components/ui/FormError"
+import { PhotoUpload } from "@/components/ui/PhotoUpload"
 import { RecipeImage } from "./RecipeImage"
 import { showApiErrors } from "@/lib/forms"
-import { RECIPE, URL_MAX } from "@/lib/limits"
-import { isHttpsUrl } from "@/lib/utils"
+import { RECIPE, URL_MAX, VIDEO_URL_MAX } from "@/lib/limits"
+import { isImageUrl, isUploadPath } from "@/lib/utils"
+import { youtubeId } from "@/lib/video"
+import { clearDraft, readDraft, saveDraft, type Draft } from "@/lib/draft"
+import { formatTime } from "./format"
 import type { Recipe } from "@/types"
-import { Plus, Trash2 } from "lucide-react"
+import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react"
 
 const atMost = (max: number) => `Use no máximo ${max} caracteres`
 
@@ -30,7 +34,15 @@ export const recipeSchema = z.object({
     .trim()
     .min(RECIPE.descriptionMin, `Descreva melhor a receita (pelo menos ${RECIPE.descriptionMin} caracteres)`)
     .max(RECIPE.descriptionMax, atMost(RECIPE.descriptionMax)),
-  time: z.string().trim().min(1, "Informe o tempo").max(RECIPE.timeMax, atMost(RECIPE.timeMax)),
+  // em minutos; texto no formulário, como as porções, para o campo poder ficar vazio
+  time_minutes: z
+    .string()
+    .trim()
+    .min(1, "Informe o tempo")
+    .refine(
+      (v) => /^\d+$/.test(v) && Number(v) >= RECIPE.timeMinutesMin && Number(v) <= RECIPE.timeMinutesMax,
+      `Use um número de ${RECIPE.timeMinutesMin} a ${RECIPE.timeMinutesMax} minutos`
+    ),
   portions: z
     .string()
     .trim()
@@ -40,6 +52,11 @@ export const recipeSchema = z.object({
       `Use um número de ${RECIPE.portionsMin} a ${RECIPE.portionsMax}`
     ),
   category_id: z.string().min(1, "Selecione uma categoria"),
+  video_url: z
+    .string()
+    .trim()
+    .max(VIDEO_URL_MAX, atMost(VIDEO_URL_MAX))
+    .refine((v) => v === "" || youtubeId(v) !== null, "Use um link de vídeo do YouTube"),
   images: z
     .array(
       z.object({
@@ -48,7 +65,7 @@ export const recipeSchema = z.object({
           .trim()
           .min(1, "Cole o link da foto ou remova o campo")
           .max(URL_MAX, atMost(URL_MAX))
-          .refine(isHttpsUrl, "Use um link que comece com https://"),
+          .refine(isImageUrl, "Use um link que comece com https:// ou envie a foto do computador"),
       })
     )
     .max(RECIPE.imagesMax, `No máximo ${RECIPE.imagesMax} fotos`),
@@ -92,9 +109,10 @@ const apiLists = ["images", "ingredients", "preparations"]
 export const emptyRecipeForm: RecipeFormValues = {
   name: "",
   description: "",
-  time: "",
+  time_minutes: "",
   portions: "",
   category_id: "",
+  video_url: "",
   images: [],
   ingredients: [{ amount: "", name: "" }],
   preparations: [{ description: "" }],
@@ -105,9 +123,10 @@ export function recipeToForm(recipe: Recipe): RecipeFormValues {
   return {
     name: recipe.name,
     description: recipe.description,
-    time: recipe.time,
+    time_minutes: String(recipe.time_minutes),
     portions: String(recipe.portions),
     category_id: String(recipe.category.id),
+    video_url: recipe.video_url,
     images: recipe.images.map(({ url }) => ({ url })),
     ingredients: recipe.ingredients.length
       ? recipe.ingredients.map(({ amount, name }) => ({ amount, name }))
@@ -124,9 +143,10 @@ export function toRecipePayload(data: RecipeFormValues): RecipePayload {
   return {
     name: data.name,
     description: data.description,
-    time: data.time,
+    time_minutes: Number(data.time_minutes),
     portions: Number(data.portions),
     category_id: Number(data.category_id),
+    video_url: data.video_url,
     images: data.images,
     ingredients: data.ingredients,
     preparations: data.preparations,
@@ -140,6 +160,8 @@ const addBtnClass =
 const removeBtnClass =
   "mt-1 rounded-lg border-2 border-[#1A0A00] p-2 text-[#1A0A00]/30 transition-colors hover:border-[#C0392B] hover:bg-[#C0392B]/10 hover:text-[#C0392B]"
 const listErrorClass = "text-xs font-bold text-[#C0392B]"
+const moveBtnClass =
+  "rounded-md border-2 border-transparent p-0.5 text-[#1A0A00]/40 transition-colors hover:border-[#1A0A00] hover:bg-[#F5E6C8] hover:text-[#1A0A00] disabled:pointer-events-none disabled:opacity-20"
 
 interface RecipeFormProps {
   defaultValues?: RecipeFormValues
@@ -149,6 +171,14 @@ interface RecipeFormProps {
   errorFallback: string
   submitLabel: string
   pendingLabel: string
+  // Onde guardar o rascunho neste navegador (só na criação). Sem a chave,
+  // o formulário não guarda nada.
+  draftKey?: string
+}
+
+// Formulário vazio: não vale guardar como rascunho.
+function isBlank(values: RecipeFormValues) {
+  return JSON.stringify(values) === JSON.stringify(emptyRecipeForm)
 }
 
 // Formulário de receita usado na criação e na edição.
@@ -158,7 +188,15 @@ export function RecipeForm({
   errorFallback,
   submitLabel,
   pendingLabel,
+  draftKey,
 }: RecipeFormProps) {
+  // O formulário só monta no navegador (as telas esperam a sessão), então
+  // dá para ler o rascunho já no primeiro render.
+  const [pendingDraft, setPendingDraft] = useState<Draft<RecipeFormValues> | null>(() => {
+    if (!draftKey) return null
+    const draft = readDraft<RecipeFormValues>(draftKey)
+    return draft && !isBlank(draft.values) ? draft : null
+  })
   const { data: categories } = useQuery({
     queryKey: ["categories"],
     queryFn: categoriesService.getAll,
@@ -172,6 +210,7 @@ export function RecipeForm({
     setValue,
     getValues,
     setError,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<RecipeFormValues>({
     resolver: zodResolver(recipeSchema),
@@ -183,16 +222,58 @@ export function RecipeForm({
     if (categories) setValue("category_id", getValues("category_id"))
   }, [categories, setValue, getValues])
 
+  // Guarda o rascunho meio segundo depois da última mudança. Enquanto a
+  // pessoa não decide o que fazer com um rascunho antigo, nada é gravado por
+  // cima dele.
+  const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  // depois de publicar, o rascunho some e não volta a ser gravado
+  const [published, setPublished] = useState(false)
+  const allValues = useWatch({ control })
+  // começa com os valores da montagem: abrir o formulário não grava nada
+  const lastSaved = useRef(JSON.stringify(allValues))
+  useEffect(() => {
+    if (!draftKey || pendingDraft) return
+    if (published) {
+      clearDraft(draftKey)
+      return
+    }
+    const serialized = JSON.stringify(allValues)
+    if (serialized === lastSaved.current) return
+    clearTimeout(saveTimer.current)
+    saveTimer.current = setTimeout(() => {
+      lastSaved.current = serialized
+      const current = allValues as RecipeFormValues
+      if (isBlank(current)) clearDraft(draftKey)
+      else saveDraft(draftKey, current)
+    }, 500)
+    return () => clearTimeout(saveTimer.current)
+  }, [allValues, draftKey, pendingDraft, published])
+
+  function restoreDraft() {
+    if (!pendingDraft) return
+    // campo que faltar no rascunho (versão antiga do formulário) fica vazio
+    reset({ ...emptyRecipeForm, ...pendingDraft.values })
+    setPendingDraft(null)
+  }
+
+  function discardDraft() {
+    if (draftKey) clearDraft(draftKey)
+    setPendingDraft(null)
+  }
+
   const images = useFieldArray({ control, name: "images" })
   const ingredients = useFieldArray({ control, name: "ingredients" })
   const preparations = useFieldArray({ control, name: "preparations" })
 
   const imageUrls = useWatch({ control, name: "images" })
   const description = useWatch({ control, name: "description" })
+  const minutes = Number(useWatch({ control, name: "time_minutes" }))
 
   async function submit(data: RecipeFormValues) {
     try {
       await onSubmit(toRecipePayload(data))
+      if (draftKey) clearDraft(draftKey)
+      setPublished(true)
     } catch (error) {
       showApiErrors(error, setError, { fallback: errorFallback, fields: apiFields, lists: apiLists })
     }
@@ -200,6 +281,34 @@ export function RecipeForm({
 
   return (
     <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-6" noValidate>
+      {pendingDraft && (
+        <div
+          role="status"
+          className="flex flex-col gap-3 rounded-2xl border-[3px] border-dashed border-[#D4A017] bg-[#F5E6C8] p-5 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <p className="text-sm font-bold text-[#1A0A00]">
+            📝 Você tem uma receita não publicada
+            {pendingDraft.values.name ? ` (“${pendingDraft.values.name}”)` : ""}, guardada em{" "}
+            {new Date(pendingDraft.savedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}.
+          </p>
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              onClick={restoreDraft}
+              className="rounded-xl border-[3px] border-[#1A0A00] bg-[#D4A017] px-4 py-2 text-sm font-black text-[#1A0A00] shadow-[3px_3px_0px_#1A0A00] hover:bg-[#F0C040] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+            >
+              Continuar de onde parei
+            </button>
+            <button
+              type="button"
+              onClick={discardDraft}
+              className="rounded-xl border-[3px] border-[#1A0A00] bg-white px-4 py-2 text-sm font-black text-[#1A0A00] shadow-[3px_3px_0px_#1A0A00] hover:bg-[#FDF6E3] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+            >
+              Descartar
+            </button>
+          </div>
+        </div>
+      )}
       {/* Básico */}
       <section className={sectionClass}>
         <SectionTitle number={1}>Informações básicas</SectionTitle>
@@ -223,7 +332,19 @@ export function RecipeForm({
         />
 
         <div className="grid grid-cols-2 gap-4">
-          <Input id="time" label="Tempo" placeholder="Ex: 45 minutos" error={errors.time?.message} {...register("time")} />
+          <Input
+            id="time_minutes"
+            label="Tempo (minutos)"
+            type="number"
+            inputMode="numeric"
+            min={RECIPE.timeMinutesMin}
+            max={RECIPE.timeMinutesMax}
+            placeholder="Ex: 45"
+            // a partir de uma hora, mostra como o tempo vai aparecer na receita
+            hint={minutes >= 60 && minutes <= RECIPE.timeMinutesMax ? `Aparece como ${formatTime(minutes)}` : undefined}
+            error={errors.time_minutes?.message}
+            {...register("time_minutes")}
+          />
           <Input
             id="portions"
             label="Porções"
@@ -260,9 +381,9 @@ export function RecipeForm({
 
       {/* Fotos */}
       <section className={sectionClass}>
-        <SectionTitle number={2}>Fotos</SectionTitle>
+        <SectionTitle number={2}>Fotos e vídeo</SectionTitle>
         <p className="-mt-2 text-xs font-semibold text-[#1A0A00]/50">
-          Opcional. Cole o link (https) de até {RECIPE.imagesMax} fotos; a primeira é a capa.
+          Opcional. Até {RECIPE.imagesMax} fotos, do computador ou por link (https); a primeira é a capa.
         </p>
 
         {images.fields.map((field, index) => {
@@ -270,7 +391,7 @@ export function RecipeForm({
           return (
             <div key={field.id} className="flex items-start gap-2">
               <div className="relative mt-1 h-11 w-11 shrink-0 overflow-hidden rounded-lg border-2 border-[#1A0A00] bg-[#F5E6C8]">
-                {isHttpsUrl(url) ? (
+                {isImageUrl(url) ? (
                   <RecipeImage key={url} src={url} alt="" fallback="🖼️" fill sizes="44px" className="object-cover" />
                 ) : (
                   <div className="flex h-full items-center justify-center text-lg" aria-hidden>
@@ -278,13 +399,31 @@ export function RecipeForm({
                   </div>
                 )}
               </div>
-              <div className="flex-1">
-                <Input
-                  placeholder="https://..."
-                  aria-label={index === 0 ? "Link da foto de capa" : `Link da foto ${index + 1}`}
-                  error={errors.images?.[index]?.url?.message}
-                  {...register(`images.${index}.url`)}
-                />
+              <div className="flex flex-1 flex-col gap-1">
+                {isUploadPath(url) ? (
+                  <>
+                    <input type="hidden" {...register(`images.${index}.url`)} />
+                    <p className="flex h-11 items-center rounded-xl border-[3px] border-dashed border-[#1A0A00]/30 px-3 text-sm font-bold text-[#1A0A00]/60">
+                      {index === 0 ? "Capa: foto enviada do computador" : `Foto ${index + 1}: enviada do computador`}
+                    </p>
+                  </>
+                ) : (
+                  <Input
+                    placeholder="https://..."
+                    aria-label={index === 0 ? "Link da foto de capa" : `Link da foto ${index + 1}`}
+                    error={errors.images?.[index]?.url?.message}
+                    {...register(`images.${index}.url`)}
+                  />
+                )}
+                {index > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => images.move(index, 0)}
+                    className="self-start text-xs font-black text-[#C0392B] hover:underline"
+                  >
+                    Usar como capa
+                  </button>
+                )}
               </div>
               <button
                 type="button"
@@ -299,14 +438,32 @@ export function RecipeForm({
         })}
         <ListError message={errors.images?.root?.message ?? errors.images?.message} />
 
-        <button
-          type="button"
-          onClick={() => images.append({ url: "" })}
-          disabled={images.fields.length >= RECIPE.imagesMax}
-          className={addBtnClass}
-        >
-          <Plus className="h-4 w-4" /> Adicionar foto
-        </button>
+        <div className="flex flex-wrap items-start gap-3">
+          <PhotoUpload
+            label="Enviar do computador"
+            max={RECIPE.imagesMax - images.fields.length}
+            onUploaded={(urls) => images.append(urls.map((url) => ({ url })))}
+          />
+          <button
+            type="button"
+            onClick={() => images.append({ url: "" })}
+            disabled={images.fields.length >= RECIPE.imagesMax}
+            className={addBtnClass}
+          >
+            <Plus className="h-4 w-4" /> Adicionar link
+          </button>
+        </div>
+
+        <Input
+          id="video_url"
+          label="Vídeo (opcional)"
+          type="url"
+          inputMode="url"
+          placeholder="https://www.youtube.com/watch?v=..."
+          hint="Link de um vídeo do YouTube mostrando o preparo."
+          error={errors.video_url?.message}
+          {...register("video_url")}
+        />
       </section>
 
       {/* Ingredientes */}
@@ -330,14 +487,22 @@ export function RecipeForm({
               />
             </div>
             {ingredients.fields.length > 1 && (
-              <button
-                type="button"
-                onClick={() => ingredients.remove(index)}
-                aria-label={`Remover ingrediente ${index + 1}`}
-                className={removeBtnClass}
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              <>
+                <MoveButtons
+                  label="ingrediente"
+                  index={index}
+                  count={ingredients.fields.length}
+                  onMove={(to) => ingredients.move(index, to)}
+                />
+                <button
+                  type="button"
+                  onClick={() => ingredients.remove(index)}
+                  aria-label={`Remover ingrediente ${index + 1}`}
+                  className={removeBtnClass}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </>
             )}
           </div>
         ))}
@@ -372,14 +537,22 @@ export function RecipeForm({
               />
             </div>
             {preparations.fields.length > 1 && (
-              <button
-                type="button"
-                onClick={() => preparations.remove(index)}
-                aria-label={`Remover passo ${index + 1}`}
-                className={removeBtnClass}
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              <>
+                <MoveButtons
+                  label="passo"
+                  index={index}
+                  count={preparations.fields.length}
+                  onMove={(to) => preparations.move(index, to)}
+                />
+                <button
+                  type="button"
+                  onClick={() => preparations.remove(index)}
+                  aria-label={`Remover passo ${index + 1}`}
+                  className={removeBtnClass}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </>
             )}
           </div>
         ))}
@@ -416,6 +589,32 @@ function SectionTitle({ number, children }: { number: number; children: React.Re
       </span>
       {children}
     </h2>
+  )
+}
+
+// Setas para trocar o item de lugar com o de cima ou o de baixo.
+function MoveButtons({ label, index, count, onMove }: { label: string; index: number; count: number; onMove: (to: number) => void }) {
+  return (
+    <div className="mt-0.5 flex flex-col">
+      <button
+        type="button"
+        onClick={() => onMove(index - 1)}
+        disabled={index === 0}
+        aria-label={`Subir ${label} ${index + 1}`}
+        className={moveBtnClass}
+      >
+        <ChevronUp className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        onClick={() => onMove(index + 1)}
+        disabled={index === count - 1}
+        aria-label={`Descer ${label} ${index + 1}`}
+        className={moveBtnClass}
+      >
+        <ChevronDown className="h-4 w-4" />
+      </button>
+    </div>
   )
 }
 

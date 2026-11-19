@@ -2,13 +2,18 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getRecipe } from "@/lib/server-api"
-import { formatDate, isHttpsUrl } from "@/lib/utils"
+import { formatDate, isImageUrl } from "@/lib/utils"
 import { Header } from "@/components/layout/Header"
 import { FavoriteButton } from "@/components/recipe/FavoriteButton"
 import { CommentSection } from "@/components/recipe/CommentSection"
 import { RecipeOwnerActions } from "@/components/recipe/RecipeOwnerActions"
-import { RecipeImage } from "@/components/recipe/RecipeImage"
-import { portionsLabel } from "@/components/recipe/format"
+import { PhotoCarousel } from "@/components/recipe/PhotoCarousel"
+import { PrintButton } from "@/components/recipe/PrintButton"
+import { ShareButton } from "@/components/recipe/ShareButton"
+import { CookMode } from "@/components/recipe/CookMode"
+import { CookingProvider, IngredientList, StepList } from "@/components/recipe/Cooking"
+import { RecipeVideo } from "@/components/recipe/RecipeVideo"
+import { formatTime, portionsLabel } from "@/components/recipe/format"
 import { Avatar } from "@/components/user/Avatar"
 import { ArrowLeft, ChefHat, Clock, Users } from "lucide-react"
 
@@ -33,144 +38,110 @@ export default async function RecipePage({ params }: PageProps) {
   const recipe = await getRecipe(id)
   if (!recipe) notFound()
 
-  const [cover, ...gallery] = recipe.images
+  const photos = recipe.images.filter((image) => isImageUrl(image.url))
 
   return (
     <>
       <Header />
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6">
-        <Link href="/dashboard" className="mb-6 inline-flex items-center gap-1.5 text-sm font-black text-[#1A0A00]/50 hover:text-[#C0392B]">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6 print:max-w-none print:p-0">
+        <Link href="/recipes" className="mb-6 inline-flex items-center print:hidden gap-1.5 text-sm font-black text-[#1A0A00]/50 hover:text-[#C0392B]">
           <ArrowLeft className="h-4 w-4" /> Todas as receitas
         </Link>
 
-        {/* Capa */}
-        <div className="relative mb-10 h-64 overflow-hidden rounded-3xl border-4 border-[#1A0A00] bg-[#F5E6C8] shadow-[6px_6px_0px_#1A0A00] sm:h-80 md:h-96">
-          <RecipeImage
-            src={cover?.url ?? ""}
-            alt={recipe.name}
-            fill
-            priority
-            sizes="(min-width: 1024px) 1024px, 100vw"
-            className="object-cover"
-            fallback="🍽️"
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
-
-          <div className="absolute bottom-0 left-0 right-0 p-6">
-            <div className="mb-2 flex flex-wrap items-center gap-2">
+        {/* Capa: todas as fotos da receita num carrossel */}
+        <div className="mb-10 print:hidden">
+          <PhotoCarousel images={photos} name={recipe.name}>
+            <div className="mb-2 flex w-fit flex-wrap items-center gap-2">
               <Link
-                href={`/dashboard?categoria=${recipe.category.id}`}
+                href={`/recipes?categoria=${recipe.category.id}`}
                 className="rounded-full border-2 border-[#1A0A00] bg-[#D4A017] px-3 py-0.5 text-xs font-black text-[#1A0A00] shadow-[2px_2px_0px_#1A0A00] hover:bg-[#F0C040]"
               >
                 {recipe.category.name}
               </Link>
               <FavoriteButton recipeId={recipe.id} />
             </div>
-            <h1 className="text-3xl font-black text-white drop-shadow-lg sm:text-4xl" style={{ textShadow: "2px 2px 0 #000" }}>
+            <h1 className="w-fit text-3xl font-black text-white drop-shadow-lg sm:text-4xl" style={{ textShadow: "2px 2px 0 #000" }}>
               {recipe.name}
             </h1>
-          </div>
+          </PhotoCarousel>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          <div className="flex flex-col gap-8 lg:col-span-2">
-            <p className="whitespace-pre-line text-base font-semibold leading-relaxed text-[#1A0A00]/70">
+        {/* No papel saem só o nome, os ingredientes e o modo de preparo, nessa
+            ordem; o resto leva print:hidden. */}
+        <p className="mb-6 hidden text-3xl font-black text-black print:block">{recipe.name}</p>
+
+        {/* A ordem aqui é a do celular e a do papel: ingredientes antes do
+            preparo. No computador a grade põe a coluna lateral à direita. */}
+        <CookingProvider base={recipe.portions}>
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:grid-rows-[auto_auto_auto_1fr] print:block">
+            <p className="whitespace-pre-line text-base font-semibold leading-relaxed text-[#1A0A00]/70 lg:col-span-2 lg:col-start-1 lg:row-start-1 print:hidden">
               {recipe.description}
             </p>
 
-            {gallery.length > 0 && (
-              <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-                {gallery.filter((image) => isHttpsUrl(image.url)).map((image, index) => (
-                  <a
-                    key={image.id}
-                    href={image.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="relative aspect-square overflow-hidden rounded-xl border-[3px] border-[#1A0A00] bg-[#F5E6C8] shadow-[3px_3px_0px_#1A0A00] transition-transform hover:-translate-y-0.5"
-                  >
-                    <RecipeImage
-                      src={image.url}
-                      alt={`${recipe.name}, foto ${index + 2}`}
-                      fill
-                      sizes="(min-width: 640px) 160px, 33vw"
-                      className="object-cover"
-                    />
-                  </a>
-                ))}
+            <aside className="flex flex-col gap-4 lg:col-start-3 lg:row-span-4 lg:row-start-1 print:mb-8">
+              <div className="contents print:hidden">
+                <RecipeOwnerActions recipeId={recipe.id} ownerId={recipe.author.id} />
               </div>
-            )}
+              <CookMode name={recipe.name} ingredients={recipe.ingredients} preparations={recipe.preparations} />
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-1 xl:grid-cols-2 print:hidden">
+                <ShareButton title={recipe.name} />
+                <PrintButton />
+              </div>
 
-            <section className="rounded-2xl border-[3px] border-[#1A0A00] bg-white p-6 shadow-[4px_4px_0px_#1A0A00]">
+              <div className="rounded-2xl border-[3px] border-[#1A0A00] bg-white p-5 shadow-[4px_4px_0px_#1A0A00] print:hidden">
+                <p className="mb-4 text-xs font-black uppercase tracking-widest text-[#1A0A00]/40">Informações</p>
+                {[
+                  { icon: <Clock className="h-4 w-4 text-[#C0392B]" />, label: "Tempo", value: formatTime(recipe.time_minutes) },
+                  { icon: <Users className="h-4 w-4 text-[#C0392B]" />, label: "Rende", value: portionsLabel(recipe.portions) },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-3 border-b-2 border-dashed border-[#F5E6C8] py-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border-2 border-[#1A0A00] bg-[#F5E6C8] shadow-[2px_2px_0px_#1A0A00]">
+                      {item.icon}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-[#1A0A00]/40">{item.label}</p>
+                      <p className="text-sm font-black text-[#1A0A00]">{item.value}</p>
+                    </div>
+                  </div>
+                ))}
+                <Link
+                  href={`/users/${recipe.author.id}`}
+                  title={`Ver as receitas de ${recipe.author.name}`}
+                  className="group -mx-2 mt-1 flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-[#F5E6C8]"
+                >
+                  <Avatar src={recipe.author.image_profile} />
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-1 text-xs font-bold text-[#1A0A00]/40">
+                      <ChefHat className="h-3 w-3" aria-hidden /> Chef
+                    </p>
+                    <p className="truncate text-sm font-black text-[#1A0A00] group-hover:text-[#C0392B]">{recipe.author.name}</p>
+                    <p className="text-xs font-semibold text-[#1A0A00]/40">
+                      publicada em <time dateTime={recipe.created_at}>{formatDate(recipe.created_at)}</time>
+                    </p>
+                  </div>
+                </Link>
+              </div>
+
+              <IngredientList ingredients={recipe.ingredients} recipeName={recipe.name} />
+            </aside>
+
+            <section className="lg:col-span-2 lg:col-start-1 lg:row-start-2 rounded-2xl border-[3px] border-[#1A0A00] bg-white p-6 shadow-[4px_4px_0px_#1A0A00] print:border-0 print:p-0 print:shadow-none">
               <div className="mb-5 flex items-center gap-3">
                 <div className="h-6 w-1.5 rounded-full border-2 border-[#1A0A00] bg-[#C0392B]" />
                 <h2 className="text-xl font-black text-[#1A0A00]">Modo de preparo</h2>
               </div>
-              <ol className="flex flex-col gap-4">
-                {recipe.preparations.map((step, index) => (
-                  <li key={step.id} className="flex gap-4">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-[#1A0A00] bg-[#C0392B] text-sm font-black text-white shadow-[2px_2px_0px_#1A0A00]">
-                      {index + 1}
-                    </span>
-                    <p className="whitespace-pre-line pt-1 text-sm font-semibold leading-relaxed text-[#1A0A00]/70">
-                      {step.description}
-                    </p>
-                  </li>
-                ))}
-              </ol>
+              <StepList steps={recipe.preparations} />
             </section>
 
-            <CommentSection recipeId={recipe.id} />
+            <div className="empty:hidden lg:col-span-2 lg:col-start-1 lg:row-start-3">
+              <RecipeVideo url={recipe.video_url} title={recipe.name} />
+            </div>
+
+            <div className="lg:col-span-2 lg:col-start-1 lg:row-start-4 print:hidden">
+              <CommentSection recipeId={recipe.id} />
+            </div>
           </div>
-
-          <aside className="flex flex-col gap-4">
-            <RecipeOwnerActions recipeId={recipe.id} ownerId={recipe.author.id} />
-
-            <div className="rounded-2xl border-[3px] border-[#1A0A00] bg-white p-5 shadow-[4px_4px_0px_#1A0A00]">
-              <p className="mb-4 text-xs font-black uppercase tracking-widest text-[#1A0A00]/40">Informações</p>
-              {[
-                { icon: <Clock className="h-4 w-4 text-[#C0392B]" />, label: "Tempo", value: recipe.time },
-                { icon: <Users className="h-4 w-4 text-[#C0392B]" />, label: "Rende", value: portionsLabel(recipe.portions) },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-3 border-b-2 border-dashed border-[#F5E6C8] py-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl border-2 border-[#1A0A00] bg-[#F5E6C8] shadow-[2px_2px_0px_#1A0A00]">
-                    {item.icon}
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-[#1A0A00]/40">{item.label}</p>
-                    <p className="text-sm font-black text-[#1A0A00]">{item.value}</p>
-                  </div>
-                </div>
-              ))}
-              <div className="flex items-center gap-3 pt-3">
-                <Avatar src={recipe.author.image_profile} />
-                <div className="min-w-0">
-                  <p className="flex items-center gap-1 text-xs font-bold text-[#1A0A00]/40">
-                    <ChefHat className="h-3 w-3" aria-hidden /> Chef
-                  </p>
-                  <p className="truncate text-sm font-black text-[#1A0A00]">{recipe.author.name}</p>
-                  <p className="text-xs font-semibold text-[#1A0A00]/40">
-                    publicada em <time dateTime={recipe.created_at}>{formatDate(recipe.created_at)}</time>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border-[3px] border-[#1A0A00] bg-white p-5 shadow-[4px_4px_0px_#1A0A00]">
-              <p className="mb-4 text-xs font-black uppercase tracking-widest text-[#1A0A00]/40">🥢 Ingredientes</p>
-              <ul className="flex flex-col gap-2">
-                {recipe.ingredients.map((item) => (
-                  <li key={item.id} className="flex items-start gap-2.5 border-b-2 border-dashed border-[#F5E6C8] pb-2 text-sm last:border-0 last:pb-0">
-                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full border-2 border-[#1A0A00] bg-[#C0392B]" />
-                    <span>
-                      <span className="font-black text-[#1A0A00]">{item.amount}</span>
-                      <span className="font-semibold text-[#1A0A00]/60"> {item.name}</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </aside>
-        </div>
+        </CookingProvider>
       </main>
     </>
   )
