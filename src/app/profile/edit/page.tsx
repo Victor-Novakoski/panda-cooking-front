@@ -20,6 +20,7 @@ import { SessionNotice } from "@/components/layout/SessionNotice"
 import { Avatar } from "@/components/user/Avatar"
 import { Input } from "@/components/ui/Input"
 import { Button } from "@/components/ui/Button"
+import { Notice } from "@/components/ui/Notice"
 import { FormError } from "@/components/ui/FormError"
 import { PhotoUpload } from "@/components/ui/PhotoUpload"
 import { ArrowLeft, Trash2 } from "lucide-react"
@@ -53,7 +54,11 @@ export default function EditProfilePage() {
 
         <h1 className="mb-8 text-3xl font-black text-[#1A0A00]">🐼 Editar perfil</h1>
 
-        {status === "authenticated" && user ? (
+        {status === "authenticated" && user?.is_demo ? (
+          <Notice emoji="🔒" title="A conta de demonstração não pode ser alterada nem apagada.">
+            Crie uma conta para testar a edição do perfil.
+          </Notice>
+        ) : status === "authenticated" && user ? (
           <div className="flex flex-col gap-6">
             <ProfileDetailsForm key={user.id} />
             <DeleteAccount />

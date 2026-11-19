@@ -18,6 +18,7 @@ export function makeUser(overrides: Partial<User> = {}): User {
     email: "maria@pandacooking.com",
     image_profile: "",
     is_adm: false,
+    is_demo: false,
     created_at: "2026-01-10T12:00:00Z",
     ...overrides,
   }
@@ -42,6 +43,7 @@ export function makeRecipe(overrides: Partial<Recipe> = {}): Recipe {
     images: [{ id: 1, url: "https://images.unsplash.com/lamen.jpg" }],
     ingredients: [{ id: 1, amount: "200 g", name: "macarrão" }],
     preparations: [{ id: 1, description: "Cozinhe o macarrão" }],
+    is_demo: false,
     created_at: "2026-10-01T10:00:00Z",
     updated_at: "2026-10-01T10:00:00Z",
     ...overrides,

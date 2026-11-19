@@ -55,12 +55,15 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="flex flex-wrap gap-2">
-                <Link
-                  href="/profile/edit"
-                  className="flex items-center gap-2 rounded-xl border-[3px] border-[#1A0A00] bg-white px-5 py-2.5 text-sm font-black text-[#1A0A00] shadow-[3px_3px_0px_#1A0A00] transition-all hover:bg-[#F5E6C8] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
-                >
-                  <Pencil className="h-4 w-4" /> Editar perfil
-                </Link>
+                {/* a conta de demonstração não muda (a senha dela é pública) */}
+                {!user.is_demo && (
+                  <Link
+                    href="/profile/edit"
+                    className="flex items-center gap-2 rounded-xl border-[3px] border-[#1A0A00] bg-white px-5 py-2.5 text-sm font-black text-[#1A0A00] shadow-[3px_3px_0px_#1A0A00] transition-all hover:bg-[#F5E6C8] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                  >
+                    <Pencil className="h-4 w-4" /> Editar perfil
+                  </Link>
+                )}
                 <Link
                   href="/recipes/new"
                   className="flex items-center gap-2 rounded-xl border-[3px] border-[#A07010] bg-[#D4A017] px-5 py-2.5 text-sm font-black text-[#1A0A00] shadow-[3px_3px_0px_#1A0A00] transition-all hover:bg-[#F0C040] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"

@@ -65,6 +65,10 @@ export default function EditRecipePage() {
           )
         ) : user?.id !== recipe.author.id ? (
           <Notice emoji="🔒" title="Só quem criou a receita pode editá-la." />
+        ) : recipe.is_demo ? (
+          <Notice emoji="🔒" title="Receitas de demonstração não podem ser alteradas nem apagadas.">
+            Publique uma receita nova para testar a edição.
+          </Notice>
         ) : (
           <div className="flex flex-col gap-6">
             <RecipeForm

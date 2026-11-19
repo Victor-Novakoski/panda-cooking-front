@@ -109,4 +109,13 @@ describe("EditProfilePage", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Não foi possível conferir sua sessão.")
     expect(replace).not.toHaveBeenCalled()
   })
+
+  it("conta de demonstração não pode ser editada nem apagada", () => {
+    loginAs({ is_demo: true })
+    renderWithClient(<EditProfilePage />)
+
+    expect(screen.getByText("A conta de demonstração não pode ser alterada nem apagada.")).toBeInTheDocument()
+    expect(screen.queryByLabelText("Nome")).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Apagar conta" })).not.toBeInTheDocument()
+  })
 })

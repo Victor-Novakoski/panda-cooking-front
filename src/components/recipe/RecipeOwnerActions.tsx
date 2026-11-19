@@ -6,9 +6,18 @@ import { Pencil } from "lucide-react"
 
 // A página da receita é renderizada no servidor, que não sabe quem está
 // logado; o botão de editar aparece no navegador, só para quem criou a receita.
-export function RecipeOwnerActions({ recipeId, ownerId }: { recipeId: string; ownerId: string }) {
+// Receita de demonstração ninguém edita (a senha dessas contas é pública).
+export function RecipeOwnerActions({ recipeId, ownerId, isDemo }: { recipeId: string; ownerId: string; isDemo: boolean }) {
   const user = useAuthStore((s) => s.user)
   if (!user || user.id !== ownerId) return null
+
+  if (isDemo) {
+    return (
+      <p className="rounded-xl border-[3px] border-dashed border-[#D4A017] bg-[#F5E6C8] px-4 py-2.5 text-center text-sm font-bold text-[#1A0A00]/70">
+        Receita de demonstração: não dá para editar nem apagar.
+      </p>
+    )
+  }
 
   return (
     <Link
